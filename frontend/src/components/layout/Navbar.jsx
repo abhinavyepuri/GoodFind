@@ -1,17 +1,20 @@
 import * as React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Search, Heart, ShoppingBag, Sun, Moon, Menu, X, ChevronDown, ArrowRight, Package } from 'lucide-react';
+import { Search, Heart, ShoppingBag, Sun, Moon, Menu, X, ChevronDown, ArrowRight, Package, User, LogOut, MapPin } from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
 import { useWishlistStore } from '@/store/wishlistStore';
 import { useThemeStore } from '@/store/themeStore';
 import { useProductStore } from '@/store/productStore';
+import { useAuthStore } from '@/store/authStore';
 import { SearchModal } from '@/components/search/SearchModal';
 import { MiniCartSheet } from '@/components/cart/MiniCartSheet';
+import { AuthModal } from '@/components/auth/AuthModal';
 import { formatPrice } from '@/lib/utils';
 export function Navbar() {
     const [isSearchOpen, setIsSearchOpen] = React.useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
     const [activeMegaMenu, setActiveMegaMenu] = React.useState(null);
+    const [isAccountMenuOpen, setIsAccountMenuOpen] = React.useState(false);
     const location = useLocation();
     const openCart = useCartStore((state) => state.openCart);
     const cartItemCount = useCartStore((state) => state.getItemCount());
@@ -19,10 +22,17 @@ export function Navbar() {
     const wishlistItems = useWishlistStore((state) => state.items);
     const { theme, toggleTheme } = useThemeStore();
     const { categories } = useProductStore();
-    // Close mobile menu on route change
+    const { user, isAuthenticated, openAuthModal, logout, initAuth } = useAuthStore();
+
+    React.useEffect(() => {
+        initAuth();
+    }, [initAuth]);
+
+    // Close menus on route change
     React.useEffect(() => {
         setIsMobileMenuOpen(false);
         setActiveMegaMenu(null);
+        setIsAccountMenuOpen(false);
     }, [location.pathname]);
     return (<>
       <header className="sticky top-0 z-40 w-full border-b border-border/80 bg-background/95 backdrop-blur-md transition-all">
@@ -120,10 +130,79 @@ export function Navbar() {
                 </span>)}
             </Link>
 
-            {/* Orders History Link */}
-            <Link to="/account/orders" className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors" aria-label="View Orders" title="My Orders">
-              <Package className="h-4 w-4"/>
-            </Link>
+            {/* User Account / Sign In Dropdown (Touchpoint 1) */}
+            <div className="relative" onMouseLeave={() => setIsAccountMenuOpen(false)}>
+              <button
+                onClick={() => {
+                  if (!isAuthenticated) {
+                    openAuthModal('login');
+                  } else {
+                    setIsAccountMenuOpen(!isAccountMenuOpen);
+                  }
+                }}
+                onMouseEnter={() => isAuthenticated && setIsAccountMenuOpen(true)}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                aria-label="Account navigation"
+              >
+                <User className="h-4 w-4" />
+                <span className="hidden sm:inline">
+                  {isAuthenticated ? (user?.name?.split(' ')[0] || 'Account') : 'Sign In'}
+                </span>
+                {isAuthenticated && <ChevronDown className="h-3 w-3 opacity-60" />}
+              </button>
+
+              {/* Account Dropdown Menu */}
+              {isAccountMenuOpen && isAuthenticated && (
+                <div className="absolute right-0 top-full mt-1.5 w-60 rounded-2xl border bg-background/98 backdrop-blur-xl p-2 shadow-2xl z-50 animate-in fade-in-50 slide-in-from-top-2 duration-150">
+                  <div className="px-3 py-2 border-b border-border/60 mb-1">
+                    <p className="text-xs font-bold text-foreground truncate">{user?.name || 'Valued Customer'}</p>
+                    <p className="text-[11px] text-muted-foreground truncate">{user?.email}</p>
+                  </div>
+
+                  <div className="space-y-0.5">
+                    <Link
+                      to="/account/orders"
+                      onClick={() => setIsAccountMenuOpen(false)}
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-foreground hover:bg-muted transition-colors"
+                    >
+                      <Package className="h-4 w-4 text-primary" />
+                      <span>Orders & Tracking</span>
+                    </Link>
+
+                    <Link
+                      to="/account/orders?tab=addresses"
+                      onClick={() => setIsAccountMenuOpen(false)}
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-foreground hover:bg-muted transition-colors"
+                    >
+                      <MapPin className="h-4 w-4 text-primary" />
+                      <span>Saved Addresses</span>
+                    </Link>
+
+                    <Link
+                      to="/wishlist"
+                      onClick={() => setIsAccountMenuOpen(false)}
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-foreground hover:bg-muted transition-colors"
+                    >
+                      <Heart className="h-4 w-4 text-primary" />
+                      <span>Saved Wishlist ({wishlistItems.length})</span>
+                    </Link>
+                  </div>
+
+                  <div className="mt-1 pt-1 border-t border-border/60">
+                    <button
+                      onClick={() => {
+                        setIsAccountMenuOpen(false);
+                        logout();
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-destructive hover:bg-destructive/10 transition-colors"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      <span>Sign Out</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
 
             {/* Flagship Cart Bag Button */}
             <button onClick={openCart} className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-zinc-950 text-white hover:bg-zinc-800 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-100 text-xs font-semibold shadow-sm transition-all" aria-label="Open Shopping Bag">
@@ -138,9 +217,30 @@ export function Navbar() {
 
         {/* Mobile Navigation Drawer */}
         {isMobileMenuOpen && (<div className="md:hidden border-t bg-background p-4 space-y-4 animate-fade-in shadow-xl">
+            {isAuthenticated ? (
+              <div className="p-3 bg-muted/50 rounded-xl space-y-1">
+                <p className="text-xs font-bold text-foreground">{user?.name}</p>
+                <p className="text-[11px] text-muted-foreground">{user?.email}</p>
+              </div>
+            ) : (
+              <button
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  openAuthModal('login');
+                }}
+                className="w-full py-2.5 px-3 rounded-xl bg-primary text-primary-foreground font-semibold text-xs flex items-center justify-center gap-2"
+              >
+                <User className="h-4 w-4" />
+                <span>Sign In or Create Account</span>
+              </button>
+            )}
+
             <div className="space-y-1">
               <Link to="/account/orders" className="block px-3 py-2 rounded-lg font-medium text-foreground hover:bg-muted">
                 My Orders & Tracking
+              </Link>
+              <Link to="/account/orders?tab=addresses" className="block px-3 py-2 rounded-lg font-medium text-foreground hover:bg-muted">
+                Saved Address Book
               </Link>
               <Link to="/catalog" className="block px-3 py-2 rounded-lg font-medium text-foreground hover:bg-muted">
                 All Products Catalog
@@ -148,6 +248,17 @@ export function Navbar() {
               {categories.map((c) => (<Link key={c.id} to={`/category/${c.slug}`} className="block px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg">
                   {c.name}
                 </Link>))}
+              {isAuthenticated && (
+                <button
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    logout();
+                  }}
+                  className="w-full text-left px-3 py-2 rounded-lg text-sm text-destructive hover:bg-destructive/10 font-medium"
+                >
+                  Sign Out
+                </button>
+              )}
             </div>
           </div>)}
       </header>
@@ -157,5 +268,8 @@ export function Navbar() {
 
       {/* Mini Cart Slide-out Drawer */}
       <MiniCartSheet />
+
+      {/* Authentication Modal */}
+      <AuthModal />
     </>);
 }

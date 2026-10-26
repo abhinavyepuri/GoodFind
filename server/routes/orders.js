@@ -15,6 +15,23 @@ router.get(
   })
 )
 
+// GET /api/orders/user/:userIdOrEmail
+router.get(
+  '/user/:userIdOrEmail',
+  asyncHandler(async (req, res) => {
+    const { userIdOrEmail } = req.params
+    const orders = await Order.find({
+      $or: [
+        { 'customer.id': userIdOrEmail },
+        { 'customer.email': userIdOrEmail.toLowerCase() },
+      ],
+    })
+      .sort({ createdAt: -1 })
+      .lean()
+    res.json(orders)
+  })
+)
+
 // GET /api/orders/:orderIdOrNumber
 router.get(
   '/:orderIdOrNumber',

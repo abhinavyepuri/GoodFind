@@ -1,13 +1,15 @@
 import * as React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingBag, Trash2, Plus, Minus, ArrowRight, ShieldCheck, Tag, CheckCircle2, Truck, RotateCcw, } from 'lucide-react';
+import { ShoppingBag, Trash2, Plus, Minus, ArrowRight, ShieldCheck, Tag, CheckCircle2, Truck, RotateCcw, User } from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
+import { useAuthStore } from '@/store/authStore';
 import { formatPrice } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 export function CartPage() {
     const navigate = useNavigate();
     const { items, removeItem, updateQuantity, clearCart, getSubtotal, getDiscount, getShipping, getTax, getTotal, appliedCoupon, applyCoupon, removeCoupon, couponError, } = useCartStore();
+    const { user, isAuthenticated, openAuthModal } = useAuthStore();
     const [couponCode, setCouponCode] = React.useState('');
     const [couponAppliedSuccess, setCouponAppliedSuccess] = React.useState(false);
     const subtotal = getSubtotal();
@@ -80,6 +82,39 @@ export function CartPage() {
           <div className="h-full bg-zinc-950 dark:bg-white rounded-full transition-all duration-500" style={{ width: `${shippingPercent}%` }}/>
         </div>
       </div>
+
+      {/* Account Nudge Banner (Touchpoint 2) */}
+      {!isAuthenticated ? (
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border border-primary/20">
+          <div className="flex items-center gap-3">
+            <div className="h-9 w-9 rounded-xl bg-primary/15 flex items-center justify-center text-primary shrink-0">
+              <User className="h-4 w-4" />
+            </div>
+            <div>
+              <p className="text-xs font-bold text-foreground">Sign in for a faster checkout experience</p>
+              <p className="text-[11px] text-muted-foreground">Sign in to view saved items or auto-fill your shipping details.</p>
+            </div>
+          </div>
+          <Button
+            type="button"
+            variant="brand"
+            size="sm"
+            onClick={() => openAuthModal('login')}
+            className="h-8 px-4 text-xs font-semibold rounded-xl self-start sm:self-auto shrink-0 shadow-sm"
+          >
+            Sign In / Register
+          </Button>
+        </div>
+      ) : (
+        <div className="flex items-center justify-between p-3.5 rounded-2xl bg-muted/40 border text-xs">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="h-4 w-4 text-primary" />
+            <span className="text-muted-foreground">
+              Signed in as <strong className="text-foreground">{user?.name || user?.email}</strong>. Saved addresses ready for express checkout.
+            </span>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
         {/* Left: Items Table */}

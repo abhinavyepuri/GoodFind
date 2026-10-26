@@ -1,14 +1,16 @@
 import * as React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingBag, Trash2, Plus, Minus, ArrowRight, Sparkles, Tag, CheckCircle2, Truck, } from 'lucide-react';
+import { ShoppingBag, Trash2, Plus, Minus, ArrowRight, Sparkles, Tag, CheckCircle2, Truck, User } from 'lucide-react';
 import { Sheet, SheetHeader, SheetTitle, SheetClose } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useCartStore } from '@/store/cartStore';
+import { useAuthStore } from '@/store/authStore';
 import { formatPrice } from '@/lib/utils';
 export function MiniCartSheet() {
     const navigate = useNavigate();
     const { items, isOpen, closeCart, removeItem, updateQuantity, getSubtotal, getDiscount, getShipping, getTotal, appliedCoupon, applyCoupon, removeCoupon, couponError, } = useCartStore();
+    const { isAuthenticated, openAuthModal } = useAuthStore();
     const [couponInput, setCouponInput] = React.useState('');
     const [couponSuccess, setCouponSuccess] = React.useState(false);
     const subtotal = getSubtotal();
@@ -57,6 +59,27 @@ export function MiniCartSheet() {
             <div className="h-full bg-zinc-950 dark:bg-white rounded-full transition-all duration-500 ease-out" style={{ width: `${shippingProgress}%` }}/>
           </div>
         </div>)}
+
+      {/* Account Nudge Banner (Touchpoint 2) */}
+      {!isAuthenticated && items.length > 0 && (
+        <div className="flex items-center justify-between p-2.5 rounded-xl bg-primary/5 border border-primary/20 text-xs mb-3">
+          <div className="flex items-center gap-2">
+            <User className="h-3.5 w-3.5 text-primary shrink-0" />
+            <span className="text-[11px] text-muted-foreground leading-tight">
+              Sign in to auto-fill your saved shipping details.
+            </span>
+          </div>
+          <button
+            onClick={() => {
+              closeCart();
+              openAuthModal('login');
+            }}
+            className="text-[11px] font-bold text-primary hover:underline shrink-0 ml-2"
+          >
+            Sign In
+          </button>
+        </div>
+      )}
 
       {/* Items list */}
       <div className="flex-1 overflow-y-auto space-y-4 pr-1">

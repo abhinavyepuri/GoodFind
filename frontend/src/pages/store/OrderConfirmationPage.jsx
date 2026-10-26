@@ -1,14 +1,24 @@
 import * as React from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { CheckCircle2, ArrowRight, Package, Truck, MapPin } from 'lucide-react';
+import { CheckCircle2, ArrowRight, Package, Truck, MapPin, Sparkles, Lock, User } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useProductStore } from '@/store/productStore';
+import { useAuthStore } from '@/store/authStore';
 import { formatPrice } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+
 export function OrderConfirmationPage() {
     const { orderNumber } = useParams();
     const orders = useProductStore((state) => state.orders);
+    const { user, isAuthenticated, register } = useAuthStore();
     const order = orders.find((o) => o.orderNumber === orderNumber) || orders[0];
+
+    const [password, setPassword] = React.useState('');
+    const [isRegistering, setIsRegistering] = React.useState(false);
+    const [accountCreatedSuccess, setAccountCreatedSuccess] = React.useState(false);
+    const [registerError, setRegisterError] = React.useState('');
+
     React.useEffect(() => {
         // Fire confetti celebration on mount
         try {
@@ -23,6 +33,32 @@ export function OrderConfirmationPage() {
             // Confetti fallback
         }
     }, []);
+
+    const handleCreateAccount = async (e) => {
+        e.preventDefault();
+        if (!password || password.length < 6) {
+            setRegisterError('Password must be at least 6 characters.');
+            return;
+        }
+        setIsRegistering(true);
+        setRegisterError('');
+        const res = await register({
+            email: order.customer.email,
+            password,
+            name: order.customer.name,
+            phone: order.customer.phone || order.shippingAddress?.phone,
+            address: order.shippingAddress,
+            orderNumber: order.orderNumber,
+            orderId: order.id,
+        });
+        setIsRegistering(false);
+        if (res.success) {
+            setAccountCreatedSuccess(true);
+        } else {
+            setRegisterError(res.error || 'Failed to create account.');
+        }
+    };
+
     if (!order) {
         return (<div className="max-w-2xl mx-auto px-4 py-24 text-center">
         <h2 className="text-2xl font-bold">Order Not Found</h2>
@@ -62,6 +98,73 @@ export function OrderConfirmationPage() {
           </Link>
         </div>
       </div>
+
+      {/* Progressive Profiling: 1-Click Guest Account Creation (Touchpoint 4) */}
+      {!isAuthenticated && !accountCreatedSuccess ? (
+        <div className="p-6 sm:p-8 rounded-3xl border border-primary/20 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent shadow-soft space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-start gap-3.5">
+              <div className="h-10 w-10 rounded-2xl bg-primary/15 flex items-center justify-center text-primary shrink-0 mt-0.5">
+                <Sparkles className="h-5 w-5" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-base font-bold text-foreground">
+                  Order #{order.orderNumber} Placed! Save your address for next time.
+                </h3>
+                <p className="text-xs text-muted-foreground max-w-xl leading-relaxed">
+                  We already have your shipping address for <strong className="text-foreground">{order.customer.email}</strong>. Enter a password to create your GoodFind account and track this shipment in 1 click.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <form onSubmit={handleCreateAccount} className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 max-w-lg">
+            <div className="relative flex-1">
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+              <Input
+                type="password"
+                placeholder="Choose password (min 6 chars)"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="pl-9 h-11 text-xs bg-background/90 rounded-2xl"
+                required
+              />
+            </div>
+            <Button
+              type="submit"
+              variant="brand"
+              disabled={isRegistering}
+              className="h-11 px-5 text-xs font-semibold rounded-2xl shadow-md shrink-0 gap-2"
+            >
+              <span>{isRegistering ? 'Creating Account...' : 'Create GoodFind Account'}</span>
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </form>
+
+          {registerError && (
+            <p className="text-xs text-destructive font-medium">{registerError}</p>
+          )}
+        </div>
+      ) : (
+        <div className="p-5 rounded-2xl border bg-muted/40 flex items-center justify-between gap-4 text-xs">
+          <div className="flex items-center gap-3">
+            <div className="h-8 w-8 rounded-xl bg-primary/15 flex items-center justify-center text-primary shrink-0">
+              <CheckCircle2 className="h-4 w-4" />
+            </div>
+            <div>
+              <p className="font-bold text-foreground">Account Active & Address Saved</p>
+              <p className="text-muted-foreground text-[11px]">
+                This order and delivery address are permanently linked to {user?.email || order?.customer?.email}.
+              </p>
+            </div>
+          </div>
+          <Link to="/account/orders">
+            <Button variant="outline" size="sm" className="text-xs rounded-xl">
+              View in Account Hub
+            </Button>
+          </Link>
+        </div>
+      )}
 
       {/* Order Details Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

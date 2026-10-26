@@ -1,22 +1,36 @@
 import * as React from 'react';
 import { useProductStore } from '@/store/productStore';
 import { useCartStore } from '@/store/cartStore';
+import { useAuthStore } from '@/store/authStore';
 import { toast } from 'sonner';
 
 /**
  * Custom Hook for Order History management, filtering, and self-service actions
  */
 export function useOrders() {
-  const orders = useProductStore((state) => state.orders) || [];
+  const allOrders = useProductStore((state) => state.orders) || [];
   const products = useProductStore((state) => state.products) || [];
   const cancelOrderAction = useProductStore((state) => state.cancelOrder);
   const requestReturnAction = useProductStore((state) => state.requestReturn);
   const updateOrderAction = useProductStore((state) => state.updateOrder);
   const addItemToCart = useCartStore((state) => state.addItem);
+  const { user, isAuthenticated, openAuthModal } = useAuthStore();
 
   const [searchQuery, setSearchQuery] = React.useState('');
   const [activeTab, setActiveTab] = React.useState('all');
   const [dateRange, setDateRange] = React.useState('all');
+
+  // Filter orders to active user if authenticated and has matching orders
+  const orders = React.useMemo(() => {
+    if (!isAuthenticated || !user) return allOrders;
+    const cleanEmail = (user.email || '').toLowerCase().trim();
+    const userMatched = allOrders.filter(
+      (o) =>
+        (o.customer?.id && o.customer.id === user.id) ||
+        (o.customer?.email && o.customer.email.toLowerCase().trim() === cleanEmail)
+    );
+    return userMatched.length > 0 ? userMatched : allOrders;
+  }, [allOrders, isAuthenticated, user]);
 
   // Filtered orders with multi-attribute search and date filtering
   const filteredOrders = React.useMemo(() => {
@@ -181,5 +195,8 @@ export function useOrders() {
     cancelOrder,
     requestReturn,
     updateOrder: updateOrderAction,
+    user,
+    isAuthenticated,
+    openAuthModal,
   };
 }

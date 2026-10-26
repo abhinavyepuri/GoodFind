@@ -14,6 +14,7 @@ export { OrderHistoryList } from './components/OrderHistoryList';
 export { CancelOrderModal } from './components/CancelOrderModal';
 export { ReturnOrderModal } from './components/ReturnOrderModal';
 export { InvoiceModal } from './components/InvoiceModal';
+export { SavedAddressBook } from './components/SavedAddressBook';
 
 // Pages
 export { OrderHistoryPage } from './pages/OrderHistoryPage';
