@@ -1,3 +1,5 @@
+import { generateCommunityData } from './communityGenerator.js';
+
 export const mockCategories = [
     {
         id: 'cat-1',
@@ -1165,32 +1167,33 @@ export const mockCustomer = {
     addresses: [
         {
             id: 'addr-1',
-            title: 'Studio & Loft',
+            title: 'Residence',
             fullName: 'Alexandria Morgan',
-            street: '450 West 14th Street',
-            apartment: 'Suite 8B',
-            city: 'New York',
-            state: 'NY',
-            postalCode: '10014',
-            country: 'United States',
-            phone: '+1 (555) 234-5678',
+            street: '14 Perry Cross Road, Bandra West',
+            apartment: 'Flat 402, Sea Pearl',
+            city: 'Mumbai',
+            state: 'Maharashtra',
+            postalCode: '400050',
+            country: 'India',
+            phone: '+91 98201 43210',
             isDefault: true,
         },
         {
             id: 'addr-2',
-            title: 'Weekend Residence',
+            title: 'Design Studio',
             fullName: 'Alexandria Morgan',
-            street: '72 Ocean Lane',
-            city: 'Montauk',
-            state: 'NY',
-            postalCode: '11954',
-            country: 'United States',
-            phone: '+1 (555) 890-1234',
+            street: 'Plot 412, 100 Feet Road, Indiranagar',
+            apartment: 'Suite 3B, Palm Meadows',
+            city: 'Bengaluru',
+            state: 'Karnataka',
+            postalCode: '560038',
+            country: 'India',
+            phone: '+91 98201 43210',
             isDefault: false,
         },
     ],
 };
-export const mockOrders = [
+const baseMockOrders = [
     {
         id: 'ord-901',
         orderNumber: 'GF-84291',
@@ -1503,7 +1506,7 @@ export const mockOrders = [
         ],
     },
 ];
-export const mockReviews = [
+const baseMockReviews = [
     {
         id: 'rev-1',
         productId: 'prod-101',
@@ -1541,6 +1544,14 @@ export const mockReviews = [
         helpfulCount: 28,
     },
 ];
+
+// Generate lively parametric community dataset
+const communityData = generateCommunityData(mockProducts);
+
+export const mockOrders = [...baseMockOrders, ...communityData.orders];
+export const mockReviews = [...baseMockReviews, ...communityData.reviews];
+export const mockCommunityUsers = communityData.users;
+export const mockCommunityAddresses = communityData.addresses;
 export const mockCoupons = [
     {
         id: 'c-1',

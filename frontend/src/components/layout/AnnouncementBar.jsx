@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, X, Sparkles } from 'lucide-react';
+import { ArrowRight, X, Tag } from 'lucide-react';
 import { useProductStore } from '@/store/productStore';
 export function AnnouncementBar() {
     const [isVisible, setIsVisible] = React.useState(true);
@@ -12,7 +12,7 @@ export function AnnouncementBar() {
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
         <div className="flex-1 flex items-center justify-center gap-2 text-center flex-wrap">
           <span className="inline-flex items-center gap-1.5 font-semibold text-zinc-200">
-            <Sparkles className="h-3.5 w-3.5 shrink-0"/>
+            <Tag className="h-3.5 w-3.5 shrink-0"/>
             <span className="hidden sm:inline">Special Offer:</span>
           </span>
           <span className="text-zinc-300">{text}</span>

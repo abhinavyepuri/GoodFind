@@ -13,7 +13,7 @@ const CartPage = React.lazy(() => import('@/pages/store/CartPage').then((m) => (
 const CheckoutPage = React.lazy(() => import('@/pages/store/CheckoutPage').then((m) => ({ default: m.CheckoutPage })));
 const OrderConfirmationPage = React.lazy(() => import('@/pages/store/OrderConfirmationPage').then((m) => ({ default: m.OrderConfirmationPage })));
 const OrderDetailPage = React.lazy(() => import('@/pages/store/OrderDetailPage').then((m) => ({ default: m.OrderDetailPage })));
-const OrderHistoryPage = React.lazy(() => import('@/features/orders').then((m) => ({ default: m.OrderHistoryPage })));
+const OrderHistoryPage = React.lazy(() => import('@/features/orders/pages/OrderHistoryPage').then((m) => ({ default: m.default || m.OrderHistoryPage })));
 const WishlistPage = React.lazy(() => import('@/pages/store/WishlistPage').then((m) => ({ default: m.WishlistPage })));
 const FaqPage = React.lazy(() => import('@/pages/store/FaqPage').then((m) => ({ default: m.FaqPage })));
 const ContactPage = React.lazy(() => import('@/pages/store/ContactPage').then((m) => ({ default: m.ContactPage })));
@@ -21,6 +21,7 @@ const ShippingPolicyPage = React.lazy(() => import('@/pages/store/PolicyPages').
 const ReturnsPolicyPage = React.lazy(() => import('@/pages/store/PolicyPages').then((m) => ({ default: m.ReturnsPolicyPage })));
 const PrivacyPolicyPage = React.lazy(() => import('@/pages/store/PolicyPages').then((m) => ({ default: m.PrivacyPolicyPage })));
 const TermsOfServicePage = React.lazy(() => import('@/pages/store/PolicyPages').then((m) => ({ default: m.TermsOfServicePage })));
+const AuthPage = React.lazy(() => import('@/pages/store/AuthPage').then((m) => ({ default: m.default || m.AuthPage })));
 // 404
 const NotFoundPage = React.lazy(() => import('@/pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage })));
 
@@ -65,13 +66,31 @@ export function App() {
               <Route path="/returns" element={<ReturnsPolicyPage />}/>
               <Route path="/privacy" element={<PrivacyPolicyPage />}/>
               <Route path="/terms" element={<TermsOfServicePage />}/>
+              <Route path="/auth" element={<AuthPage />}/>
+              <Route path="/login" element={<AuthPage />}/>
+              <Route path="/register" element={<AuthPage />}/>
             </Route>
 
             {/* 404 Fallback */}
             <Route path="*" element={<NotFoundPage />}/>
           </Routes>
         </React.Suspense>
-        <Toaster position="bottom-right" richColors/>
+        <Toaster
+          position="bottom-center"
+          closeButton
+          toastOptions={{
+            className:
+              'border border-border/80 bg-zinc-950 text-white shadow-2xl rounded-2xl py-3 px-4 font-sans text-xs',
+            actionButtonStyle: {
+              backgroundColor: '#ffffff',
+              color: '#09090b',
+              fontWeight: '700',
+              fontSize: '11px',
+              borderRadius: '8px',
+              padding: '6px 12px',
+            },
+          }}
+        />
       </HashRouter>
     );
 }

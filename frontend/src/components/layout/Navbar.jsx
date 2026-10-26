@@ -1,275 +1,348 @@
 import * as React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Search, Heart, ShoppingBag, Sun, Moon, Menu, X, ChevronDown, ArrowRight, Package, User, LogOut, MapPin } from 'lucide-react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import {
+  Search,
+  ShoppingCart,
+  Heart,
+  Sun,
+  Moon,
+  Menu,
+  X,
+  MapPin,
+  ChevronDown,
+  Package,
+  Filter,
+} from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
 import { useWishlistStore } from '@/store/wishlistStore';
 import { useThemeStore } from '@/store/themeStore';
-import { useProductStore } from '@/store/productStore';
 import { useAuthStore } from '@/store/authStore';
+import { usePreferenceStore } from '@/store/preferenceStore';
 import { SearchModal } from '@/components/search/SearchModal';
 import { MiniCartSheet } from '@/components/cart/MiniCartSheet';
 import { AuthModal } from '@/components/auth/AuthModal';
-import { formatPrice } from '@/lib/utils';
+import { ShopifyProductsDropdown } from './ShopifyProductsDropdown';
+import { AccountDropdown } from './AccountDropdown';
+import { LocaleSelector } from './LocaleSelector';
+
 export function Navbar() {
-    const [isSearchOpen, setIsSearchOpen] = React.useState(false);
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
-    const [activeMegaMenu, setActiveMegaMenu] = React.useState(null);
-    const [isAccountMenuOpen, setIsAccountMenuOpen] = React.useState(false);
-    const location = useLocation();
-    const openCart = useCartStore((state) => state.openCart);
-    const cartItemCount = useCartStore((state) => state.getItemCount());
-    const cartSubtotal = useCartStore((state) => state.getSubtotal());
-    const wishlistItems = useWishlistStore((state) => state.items);
-    const { theme, toggleTheme } = useThemeStore();
-    const { categories } = useProductStore();
-    const { user, isAuthenticated, openAuthModal, logout, initAuth } = useAuthStore();
+  const [isSearchModalOpen, setIsSearchModalOpen] = React.useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+  const [isProductsDropdownOpen, setIsProductsDropdownOpen] = React.useState(false);
+  const [isAccountDropdownOpen, setIsAccountDropdownOpen] = React.useState(false);
+  const [searchQuery, setSearchQuery] = React.useState('');
+  const [searchCategory, setSearchCategory] = React.useState('all');
 
-    React.useEffect(() => {
-        initAuth();
-    }, [initAuth]);
+  const location = useLocation();
+  const navigate = useNavigate();
 
-    // Close menus on route change
-    React.useEffect(() => {
-        setIsMobileMenuOpen(false);
-        setActiveMegaMenu(null);
-        setIsAccountMenuOpen(false);
-    }, [location.pathname]);
-    return (<>
-      <header className="sticky top-0 z-40 w-full border-b border-border/80 bg-background/95 backdrop-blur-md transition-all">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between gap-4 py-2">
-          {/* Left: Mobile hamburger + Luxury Brand Wordmark */}
-          <div className="flex items-center gap-3 sm:gap-6">
-            <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="lg:hidden p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring" aria-label="Toggle Navigation Menu">
-              {isMobileMenuOpen ? <X className="h-5 w-5"/> : <Menu className="h-5 w-5"/>}
+  const openCart = useCartStore((state) => state.openCart);
+  const cartItemCount = useCartStore((state) => state.getItemCount());
+  const wishlistItems = useWishlistStore((state) => state.items);
+  const { theme, toggleTheme } = useThemeStore();
+  const { user, addresses, isAuthenticated, initAuth } = useAuthStore();
+
+  React.useEffect(() => {
+    initAuth();
+  }, [initAuth]);
+
+  // Close menus on route navigation
+  React.useEffect(() => {
+    setIsMobileMenuOpen(false);
+    setIsProductsDropdownOpen(false);
+    setIsAccountDropdownOpen(false);
+  }, [location.pathname]);
+
+  // Default address for Deliver to widget
+  const defaultAddress = React.useMemo(() => {
+    return addresses.find((a) => a.isDefault) || addresses[0] || null;
+  }, [addresses]);
+
+  const handleSearch = (e) => {
+    if (e) e.preventDefault();
+    if (!searchQuery.trim() && searchCategory === 'all') {
+      navigate('/catalog');
+      return;
+    }
+    const params = new URLSearchParams();
+    if (searchQuery.trim()) params.set('q', searchQuery.trim());
+    if (searchCategory !== 'all') params.set('category', searchCategory);
+    navigate(`/catalog?${params.toString()}`);
+  };
+
+  const handleLocationClick = () => {
+    if (isAuthenticated) {
+      navigate('/account/orders?tab=addresses');
+    } else {
+      navigate('/auth?tab=login');
+    }
+  };
+
+  const firstName = user?.name ? user.name.split(' ')[0] : 'You';
+
+  return (
+    <>
+      <header className="sticky top-0 z-40 w-full border-b border-border/80 bg-background/98 backdrop-blur-xl transition-all shadow-xs select-none">
+        <div className="max-w-[1540px] mx-auto px-3 sm:px-4 lg:px-6 h-16 flex items-center justify-between gap-3 lg:gap-4">
+          {/* =========================================================================
+              LEFT: Mobile Toggle + Logo + Location Widget + Shopify Products Dropdown
+             ========================================================================= */}
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            {/* Mobile Hamburger */}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="lg:hidden p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              aria-label="Toggle Navigation Menu"
+            >
+              {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
 
-            <Link to="/" className="flex items-center gap-2 group tracking-tight">
+            {/* Brand Logo */}
+            <Link
+              to="/"
+              className="flex items-baseline gap-1 px-1.5 py-1 rounded-md hover:bg-muted/60 transition-colors group"
+            >
               <span className="font-extrabold text-xl sm:text-2xl tracking-tighter text-foreground font-sans">
-                GOODFIND<span>.</span>
-              </span>
-              <span className="text-[9px] uppercase tracking-[0.25em] font-semibold text-muted-foreground border-l border-border/80 pl-2.5 ml-1 hidden sm:inline">
-                Store
+                GOODFIND<span className="text-primary font-serif">.</span>
               </span>
             </Link>
+
+            {/* Deliver To Location Widget (Amazon Style) */}
+            <button
+              onClick={handleLocationClick}
+              className="hidden xl:flex items-center gap-1.5 px-2 py-1 rounded-md hover:bg-muted text-left transition-colors cursor-pointer group"
+              title="Change Delivery Location"
+            >
+              <MapPin className="h-4 w-4 text-primary shrink-0 mt-2 transition-transform group-hover:scale-110" />
+              <div className="flex flex-col">
+                <span className="text-[10px] text-muted-foreground leading-tight">
+                  {isAuthenticated ? `Deliver to ${firstName}` : 'Deliver to'}
+                </span>
+                <span className="text-xs font-bold text-foreground leading-tight truncate max-w-[125px]">
+                  {defaultAddress
+                    ? `${defaultAddress.city || 'India'} ${defaultAddress.postalCode || ''}`
+                    : 'Select location'}
+                </span>
+              </div>
+            </button>
+
+            {/* Shopify Products Dropdown (Requirement 1) */}
+            <div className="hidden lg:block ml-1">
+              <ShopifyProductsDropdown
+                isOpen={isProductsDropdownOpen}
+                onToggle={() => {
+                  setIsProductsDropdownOpen(!isProductsDropdownOpen);
+                  setIsAccountDropdownOpen(false);
+                }}
+                onClose={() => setIsProductsDropdownOpen(false)}
+              />
+            </div>
           </div>
 
-          {/* Center: Desktop Navigation Links with Mega Menu */}
-          <nav className="hidden lg:flex items-center gap-1 text-sm font-medium">
-            <Link to="/catalog" className={`px-3 py-1.5 rounded-md transition-colors hover:text-foreground hover:bg-muted/60 ${location.pathname === '/catalog'
-            ? 'text-foreground font-bold bg-muted'
-            : 'text-muted-foreground'}`}>
-              All Catalog
+          {/* =========================================================================
+              CENTER: Funnel Filter Icon + Compact Highlighted Search Bar (Req 1.ii, 1.iii, 1.iv)
+             ========================================================================= */}
+          <div className="flex items-center gap-2 flex-1 max-w-md min-w-[180px]">
+            {/* Funnel Filter Icon Button (Req 1.ii) */}
+            <Link
+              to="/catalog"
+              className="h-10 w-10 flex items-center justify-center shrink-0 border-2 border-white bg-zinc-200/90 text-black shadow-xs dark:border-black dark:bg-zinc-800 dark:text-white transition-all hover:scale-105 active:scale-95"
+              title="Filter Catalog"
+              aria-label="Filter Catalog"
+            >
+              <Filter className="h-4.5 w-4.5 stroke-[2.2]" />
             </Link>
 
-            {categories.slice(0, 4).map((cat) => (<div key={cat.id} className="relative" onMouseEnter={() => setActiveMegaMenu(cat.id)} onMouseLeave={() => setActiveMegaMenu(null)}>
-                <Link to={`/category/${cat.slug}`} className={`px-3 py-1.5 rounded-md transition-colors hover:text-foreground hover:bg-muted/60 flex items-center gap-1 ${location.pathname === `/category/${cat.slug}`
-                ? 'text-foreground font-bold bg-muted'
-                : 'text-muted-foreground'}`}>
-                  <span>{cat.name.split('&')[0].trim()}</span>
-                  <ChevronDown className="h-3 w-3 opacity-60"/>
-                </Link>
+            {/* Highlighted Search Bar (Req 1.iv) */}
+            <form
+              onSubmit={handleSearch}
+              className="flex-1 flex items-center h-10 rounded-xl border-2 border-zinc-900/40 dark:border-white/40 bg-card shadow-sm focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/25 transition-all overflow-hidden px-3"
+            >
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search GoodFind products, deals..."
+                className="w-full h-full text-sm text-foreground placeholder:text-muted-foreground/80 bg-transparent focus:outline-none"
+              />
 
-                {/* Editorial Mega Dropdown Preview */}
-                {activeMegaMenu === cat.id && (<div className="absolute top-full left-0 mt-1 w-80 rounded-xl border bg-background/98 backdrop-blur-xl p-4 shadow-2xl z-50 animate-in fade-in-50 slide-in-from-top-2 duration-150">
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between pb-2 border-b">
-                        <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                          {cat.name}
-                        </span>
-                        <Link to={`/category/${cat.slug}`} className="text-[11px] font-semibold text-primary hover:underline flex items-center gap-1">
-                          View All ({cat.productCount}) <ArrowRight className="h-3 w-3"/>
-                        </Link>
-                      </div>
-
-                      <div className="relative aspect-video rounded-lg overflow-hidden border bg-muted group">
-                        <img src={cat.image} alt={cat.name} onError={(e) => {
-                    e.currentTarget.src = 'https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=800&auto=format&fit=crop&q=80';
-                }} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"/>
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-2.5 text-white">
-                          <span className="text-[10px] uppercase font-bold text-zinc-300">Curated Department</span>
-                          <p className="text-xs font-semibold leading-tight">{cat.description}</p>
-                        </div>
-                      </div>
-
-                      <div className="pt-1">
-                        <Link to={`/category/${cat.slug}`} className="w-full py-1.5 text-xs font-semibold text-center rounded-md bg-muted hover:bg-muted/80 text-foreground block transition-colors">
-                          Explore {cat.name.split('&')[0]} Collection →
-                        </Link>
-                      </div>
-                    </div>
-                  </div>)}
-              </div>))}
-          </nav>
-
-          {/* Right: Currency, Search, Wishlist, Bag, Theme */}
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            {/* Currency Pill */}
-            <span className="hidden xl:inline-flex items-center text-[11px] font-semibold text-muted-foreground px-2 py-1 rounded-md border bg-muted/30">
-              INR (₹)
-            </span>
-
-            {/* Search Trigger Button */}
-            <button onClick={() => setIsSearchOpen(true)} className="flex items-center gap-2 px-2.5 sm:px-3 py-1.5 rounded-md border bg-muted/40 hover:bg-muted text-muted-foreground hover:text-foreground text-xs font-medium transition-colors" aria-label="Search products">
-              <Search className="h-4 w-4"/>
-              <span className="hidden sm:inline">Search catalog...</span>
-              <kbd className="hidden md:inline-block text-[10px] bg-background border px-1.5 py-0.5 rounded text-muted-foreground">
-                ⌘K
-              </kbd>
-            </button>
-
-            {/* Theme Toggle */}
-            <button onClick={toggleTheme} className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors" aria-label="Toggle theme">
-              {theme === 'dark' ? (<Sun className="h-4 w-4 text-zinc-100"/>) : (<Moon className="h-4 w-4 text-zinc-900"/>)}
-            </button>
-
-            {/* Wishlist Link */}
-            <Link to="/wishlist" className="relative p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors" aria-label="View Wishlist" title="Saved Wishlist">
-              <Heart className="h-4 w-4"/>
-              {wishlistItems.length > 0 && (<span className="absolute top-1 right-1 h-4 w-4 rounded-full bg-zinc-950 text-white dark:bg-white dark:text-zinc-950 text-[10px] font-bold flex items-center justify-center">
-                  {wishlistItems.length}
-                </span>)}
-            </Link>
-
-            {/* User Account / Sign In Dropdown (Touchpoint 1) */}
-            <div className="relative" onMouseLeave={() => setIsAccountMenuOpen(false)}>
+              {/* Quick Search Shortcut Pill (Cmd+K) */}
               <button
-                onClick={() => {
-                  if (!isAuthenticated) {
-                    openAuthModal('login');
-                  } else {
-                    setIsAccountMenuOpen(!isAccountMenuOpen);
-                  }
-                }}
-                onMouseEnter={() => isAuthenticated && setIsAccountMenuOpen(true)}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-                aria-label="Account navigation"
+                type="button"
+                onClick={() => setIsSearchModalOpen(true)}
+                className="hidden sm:inline-flex items-center px-1.5 py-0.5 text-[10px] font-bold text-muted-foreground bg-muted border border-border/80 rounded hover:text-foreground transition-colors shrink-0"
+                title="Quick Search (⌘K)"
               >
-                <User className="h-4 w-4" />
-                <span className="hidden sm:inline">
-                  {isAuthenticated ? (user?.name?.split(' ')[0] || 'Account') : 'Sign In'}
-                </span>
-                {isAuthenticated && <ChevronDown className="h-3 w-3 opacity-60" />}
+                ⌘K
               </button>
+            </form>
+          </div>
 
-              {/* Account Dropdown Menu */}
-              {isAccountMenuOpen && isAuthenticated && (
-                <div className="absolute right-0 top-full mt-1.5 w-60 rounded-2xl border bg-background/98 backdrop-blur-xl p-2 shadow-2xl z-50 animate-in fade-in-50 slide-in-from-top-2 duration-150">
-                  <div className="px-3 py-2 border-b border-border/60 mb-1">
-                    <p className="text-xs font-bold text-foreground truncate">{user?.name || 'Valued Customer'}</p>
-                    <p className="text-[11px] text-muted-foreground truncate">{user?.email}</p>
-                  </div>
-
-                  <div className="space-y-0.5">
-                    <Link
-                      to="/account/orders"
-                      onClick={() => setIsAccountMenuOpen(false)}
-                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-foreground hover:bg-muted transition-colors"
-                    >
-                      <Package className="h-4 w-4 text-primary" />
-                      <span>Orders & Tracking</span>
-                    </Link>
-
-                    <Link
-                      to="/account/orders?tab=addresses"
-                      onClick={() => setIsAccountMenuOpen(false)}
-                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-foreground hover:bg-muted transition-colors"
-                    >
-                      <MapPin className="h-4 w-4 text-primary" />
-                      <span>Saved Addresses</span>
-                    </Link>
-
-                    <Link
-                      to="/wishlist"
-                      onClick={() => setIsAccountMenuOpen(false)}
-                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-foreground hover:bg-muted transition-colors"
-                    >
-                      <Heart className="h-4 w-4 text-primary" />
-                      <span>Saved Wishlist ({wishlistItems.length})</span>
-                    </Link>
-                  </div>
-
-                  <div className="mt-1 pt-1 border-t border-border/60">
-                    <button
-                      onClick={() => {
-                        setIsAccountMenuOpen(false);
-                        logout();
-                      }}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-destructive hover:bg-destructive/10 transition-colors"
-                    >
-                      <LogOut className="h-4 w-4" />
-                      <span>Sign Out</span>
-                    </button>
-                  </div>
-                </div>
-              )}
+          {/* =========================================================================
+              RIGHT: Currency & Theme (Req 1.vi), Account (Req 2), Orders, Wishlist, Cart
+             ========================================================================= */}
+          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+            {/* Currency Selector & Theme Toggle moved together (Req 1.vi) */}
+            <div className="hidden md:flex items-center gap-1">
+              <LocaleSelector />
+              <button
+                onClick={toggleTheme}
+                className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
+                aria-label="Toggle Dark/Light Mode"
+                title="Toggle Theme"
+              >
+                {theme === 'dark' ? (
+                  <Sun className="h-4 w-4 text-amber-300" />
+                ) : (
+                  <Moon className="h-4 w-4 text-zinc-700" />
+                )}
+              </button>
             </div>
 
-            {/* Flagship Cart Bag Button */}
-            <button onClick={openCart} className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-zinc-950 text-white hover:bg-zinc-800 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-100 text-xs font-semibold shadow-sm transition-all" aria-label="Open Shopping Bag">
-              <ShoppingBag className="h-3.5 w-3.5"/>
-              <span>Bag ({cartItemCount})</span>
-              {cartItemCount > 0 && (<span className="hidden sm:inline border-l border-zinc-700 dark:border-zinc-300 pl-2">
-                  {formatPrice(cartSubtotal)}
-                </span>)}
+            {/* Hello, "Name" / Account & Lists Dropdown (Requirement 2) */}
+            <AccountDropdown
+              isOpen={isAccountDropdownOpen}
+              onToggle={() => {
+                setIsAccountDropdownOpen(!isAccountDropdownOpen);
+                setIsProductsDropdownOpen(false);
+              }}
+              onClose={() => setIsAccountDropdownOpen(false)}
+            />
+
+            {/* Returns & Orders Link (Amazon Style) */}
+            <Link
+              to="/account/orders"
+              className="hidden lg:flex flex-col text-left px-2 py-1 rounded-md text-foreground hover:outline hover:outline-1 hover:outline-border transition-all"
+              title="Returns & Orders"
+            >
+              <span className="text-[11px] text-muted-foreground leading-tight">Returns</span>
+              <span className="text-xs font-bold text-foreground leading-tight">& Orders</span>
+            </Link>
+
+            {/* Wishlist Link with Active Badge (Requirement 5) */}
+            <Link
+              to="/wishlist"
+              className="relative p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              title="Saved Wishlist"
+              aria-label="View Wishlist"
+            >
+              <Heart className="h-5 w-5" />
+              {wishlistItems.length > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground text-[10px] font-bold h-4 w-4 rounded-full flex items-center justify-center shadow-xs">
+                  {wishlistItems.length}
+                </span>
+              )}
+            </Link>
+
+            {/* Cart Button (Amazon Style - Requirement 6) */}
+            <button
+              onClick={openCart}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-foreground hover:outline hover:outline-1 hover:outline-border transition-all cursor-pointer relative group"
+              aria-label="Open Shopping Cart"
+            >
+              {/* Trolley Icon with Badge directly on it */}
+              <div className="relative flex items-center justify-center">
+                <ShoppingCart className="h-6 w-6 text-foreground group-hover:scale-105 transition-transform" />
+                <span className="absolute -top-1.5 left-2.5 bg-amber-500 text-zinc-950 dark:bg-amber-400 text-[11px] font-black h-4.5 min-w-[18px] px-1 rounded-full flex items-center justify-center leading-none shadow-xs">
+                  {cartItemCount}
+                </span>
+              </div>
+              <span className="text-xs font-extrabold text-foreground leading-tight hidden sm:inline ml-0.5">
+                Cart
+              </span>
             </button>
           </div>
         </div>
 
-        {/* Mobile Navigation Drawer */}
-        {isMobileMenuOpen && (<div className="md:hidden border-t bg-background p-4 space-y-4 animate-fade-in shadow-xl">
+        {/* =========================================================================
+            MOBILE NAVIGATION DRAWER
+           ========================================================================= */}
+        {isMobileMenuOpen && (
+          <div className="lg:hidden border-t border-border bg-background/98 backdrop-blur-xl p-4 space-y-4 animate-in fade-in shadow-2xl max-h-[85vh] overflow-y-auto">
+            {/* Mobile Auth Banner */}
             {isAuthenticated ? (
-              <div className="p-3 bg-muted/50 rounded-xl space-y-1">
-                <p className="text-xs font-bold text-foreground">{user?.name}</p>
+              <div className="p-3 bg-muted/60 rounded-xl space-y-1">
+                <p className="text-xs font-bold text-foreground">Hello, {user?.name}</p>
                 <p className="text-[11px] text-muted-foreground">{user?.email}</p>
               </div>
             ) : (
-              <button
-                onClick={() => {
-                  setIsMobileMenuOpen(false);
-                  openAuthModal('login');
-                }}
-                className="w-full py-2.5 px-3 rounded-xl bg-primary text-primary-foreground font-semibold text-xs flex items-center justify-center gap-2"
+              <Link
+                to="/auth"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="w-full py-2.5 px-3 rounded-xl bg-primary text-primary-foreground font-bold text-xs flex items-center justify-center gap-2 shadow-sm text-center"
               >
-                <User className="h-4 w-4" />
-                <span>Sign In or Create Account</span>
-              </button>
+                Sign In or Create Account
+              </Link>
             )}
 
+            {/* Mobile Navigation Links */}
             <div className="space-y-1">
-              <Link to="/account/orders" className="block px-3 py-2 rounded-lg font-medium text-foreground hover:bg-muted">
-                My Orders & Tracking
-              </Link>
-              <Link to="/account/orders?tab=addresses" className="block px-3 py-2 rounded-lg font-medium text-foreground hover:bg-muted">
-                Saved Address Book
-              </Link>
-              <Link to="/catalog" className="block px-3 py-2 rounded-lg font-medium text-foreground hover:bg-muted">
+              <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground px-3 pt-2">
+                Browse Store
+              </p>
+              <Link
+                to="/catalog"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block px-3 py-2 text-sm font-semibold text-foreground hover:bg-muted rounded-lg"
+              >
                 All Products Catalog
               </Link>
-              {categories.map((c) => (<Link key={c.id} to={`/category/${c.slug}`} className="block px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg">
-                  {c.name}
-                </Link>))}
-              {isAuthenticated && (
-                <button
-                  onClick={() => {
-                    setIsMobileMenuOpen(false);
-                    logout();
-                  }}
-                  className="w-full text-left px-3 py-2 rounded-lg text-sm text-destructive hover:bg-destructive/10 font-medium"
-                >
-                  Sign Out
-                </button>
-              )}
+              <Link
+                to="/catalog?deals=true"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block px-3 py-2 text-sm font-semibold text-amber-600 dark:text-amber-400 hover:bg-muted rounded-lg"
+              >
+                Today's Deals
+              </Link>
+              <Link
+                to="/catalog?bestsellers=true"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block px-3 py-2 text-sm font-medium text-foreground hover:bg-muted rounded-lg"
+              >
+                Best Sellers
+              </Link>
             </div>
-          </div>)}
+
+            {/* Mobile Account & Tracking */}
+            <div className="space-y-1 pt-2 border-t border-border">
+              <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground px-3 pt-1">
+                Your Account
+              </p>
+              <Link
+                to="/account/orders"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block px-3 py-2 text-sm font-medium text-foreground hover:bg-muted rounded-lg"
+              >
+                Returns & Orders
+              </Link>
+              <Link
+                to="/account/orders?tab=addresses"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block px-3 py-2 text-sm font-medium text-foreground hover:bg-muted rounded-lg"
+              >
+                Saved Addresses
+              </Link>
+              <Link
+                to="/wishlist"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block px-3 py-2 text-sm font-medium text-foreground hover:bg-muted rounded-lg"
+              >
+                Saved Wishlist ({wishlistItems.length})
+              </Link>
+            </div>
+          </div>
+        )}
       </header>
 
-      {/* Search Modal */}
-      <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)}/>
+      {/* Global Quick Search Modal (Cmd+K) */}
+      <SearchModal isOpen={isSearchModalOpen} onClose={() => setIsSearchModalOpen(false)} />
 
-      {/* Mini Cart Slide-out Drawer */}
+      {/* Global Slide-out MiniCart */}
       <MiniCartSheet />
 
-      {/* Authentication Modal */}
+      {/* In-flow Auth Modal */}
       <AuthModal />
-    </>);
+    </>
+  );
 }
+export default Navbar;

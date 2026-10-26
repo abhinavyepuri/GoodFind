@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingBag, Trash2, Plus, Minus, ArrowRight, Sparkles, Tag, CheckCircle2, Truck, User } from 'lucide-react';
+import { ShoppingBag, Trash2, Plus, Minus, ArrowRight, Tag, CheckCircle2, Truck, User, ShieldCheck } from 'lucide-react';
 import { Sheet, SheetHeader, SheetTitle, SheetClose } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -208,7 +208,7 @@ export function MiniCartSheet() {
           </div>
 
           <p className="text-[11px] text-center text-muted-foreground flex items-center justify-center gap-1">
-            <Sparkles className="h-3 w-3 text-brand-500"/>
+            <ShieldCheck className="h-3 w-3 text-emerald-500"/>
             Complimentary 30-day returns & insured shipping
           </p>
         </div>)}

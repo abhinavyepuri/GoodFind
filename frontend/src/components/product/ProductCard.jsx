@@ -7,6 +7,8 @@ import { useCartStore } from '@/store/cartStore';
 import { useProductStore } from '@/store/productStore';
 import { Badge } from '@/components/ui/badge';
 import { QuickViewModal } from './QuickViewModal';
+import { showSnackbar } from '@/lib/snackbar';
+
 export function ProductCard({ product }) {
     const [isAdded, setIsAdded] = React.useState(false);
     const [isQuickViewOpen, setIsQuickViewOpen] = React.useState(false);
@@ -29,6 +31,14 @@ export function ProductCard({ product }) {
             quantity: 1,
         });
         setIsAdded(true);
+        const variantSuffix = [defaultColor, defaultSize, defaultConfig].filter(Boolean).join('-');
+        const addedItemId = variantSuffix ? `${product.id}-${variantSuffix}` : product.id;
+        showSnackbar(`Added ${product?.name} to Cart`, {
+            description: 'Item reserved in your shopping bag.',
+            onUndo: () => {
+                useCartStore.getState().removeItem(addedItemId);
+            },
+        });
         setTimeout(() => setIsAdded(false), 1500);
     };
     const handleWishlistToggle = (e) => {
@@ -51,12 +61,12 @@ export function ProductCard({ product }) {
         ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
         : 0;
     return (<>
-      <div className="group relative flex flex-col rounded-2xl border bg-card text-card-foreground shadow-soft hover:shadow-soft-md transition-all duration-300 overflow-hidden">
-        {/* Product Image Area */}
-        <Link to={`/product/${product?.slug}`} className="relative aspect-square w-full overflow-hidden bg-zinc-50/70 dark:bg-zinc-900/40 p-6 flex items-center justify-center block">
+      <div className="group relative flex flex-col rounded-2xl border border-border/80 dark:border-white/15 bg-card text-card-foreground shadow-soft hover:shadow-soft-md dark:hover:border-white/30 transition-all duration-300 overflow-hidden">
+        {/* Product Image Area with Dark Mode Frame and Anti-Glare */}
+        <Link to={`/product/${product?.slug}`} className="relative aspect-square w-full overflow-hidden bg-zinc-50/80 dark:bg-zinc-900/80 border-b border-border/50 dark:border-white/10 p-6 flex items-center justify-center block">
           <img src={product?.images?.[0] || product?.image || 'https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=800&auto=format&fit=crop&q=80'} alt={product?.name || 'Product'} loading="lazy" onError={(e) => {
             e.currentTarget.src = 'https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=800&auto=format&fit=crop&q=80';
-        }} className="h-full w-full max-h-full max-w-full object-contain object-center transition-transform duration-500 ease-out group-hover:scale-105 drop-shadow-sm"/>
+        }} className="h-full w-full max-h-full max-w-full object-contain object-center transition-transform duration-500 ease-out group-hover:scale-105 drop-shadow-sm dark:brightness-[0.96] dark:contrast-[0.98]"/>
 
           {/* Floating Badges */}
           <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-10 pointer-events-none">

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, X, ArrowRight, Package, Sparkles } from 'lucide-react';
+import { Search, X, ArrowRight, Package, TrendingUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useProductStore } from '@/store/productStore';
 import { formatPrice } from '@/lib/utils';
@@ -91,7 +91,7 @@ export function SearchModal({ isOpen, onClose }) {
             <div className="max-h-[60vh] overflow-y-auto p-4 space-y-4">
               {query.trim() === '' ? (<div>
                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                    <Sparkles className="h-3.5 w-3.5 text-brand-500"/>
+                    <TrendingUp className="h-3.5 w-3.5 text-primary"/>
                     Popular Searches
                   </p>
                   <div className="flex flex-wrap gap-2">

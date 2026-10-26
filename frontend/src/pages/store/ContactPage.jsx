@@ -3,8 +3,21 @@ import { Mail, Phone, MapPin, Send, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { useAuthStore } from '@/store/authStore';
+
 export function ContactPage() {
     const [submitted, setSubmitted] = React.useState(false);
+    const { user, isAuthenticated } = useAuthStore();
+    const [name, setName] = React.useState(user?.name || '');
+    const [email, setEmail] = React.useState(user?.email || '');
+
+    React.useEffect(() => {
+      if (user) {
+        setName(user.name || '');
+        setEmail(user.email || '');
+      }
+    }, [user]);
+
     const handleSubmit = (e) => {
         e.preventDefault();
         setSubmitted(true);
@@ -44,15 +57,6 @@ export function ContactPage() {
                 <p className="text-[11px] text-muted-foreground mt-0.5">Mon–Fri: 9am – 8pm EST</p>
               </div>
             </div>
-
-            <div className="flex items-start gap-3">
-              <MapPin className="h-5 w-5 text-primary shrink-0 mt-0.5"/>
-              <div>
-                <p className="font-bold text-foreground">Studio & Showroom</p>
-                <p className="text-muted-foreground">450 West 14th Street, Suite 8B</p>
-                <p className="text-muted-foreground">Meatpacking District, New York, NY 10014</p>
-              </div>
-            </div>
           </div>
         </div>
 
@@ -67,20 +71,47 @@ export function ContactPage() {
                 Thank you for contacting GoodFind Concierge. A representative will respond to your inquiry shortly.
               </p>
             </div>) : (<form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground block mb-1">
-                    Your Name
-                  </label>
-                  <Input placeholder="Alexandria Morgan" required/>
+              {isAuthenticated ? (
+                <div className="p-3.5 rounded-2xl bg-muted/60 border border-border/80 flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                      Sending As Verified Member
+                    </span>
+                    <p className="text-xs font-bold text-foreground">
+                      {user?.name || 'Customer'} <span className="text-muted-foreground font-normal">({user?.email})</span>
+                    </p>
+                  </div>
+                  <span className="text-[10px] bg-primary/10 text-primary font-bold px-2 py-0.5 rounded-full">
+                    Auto-Linked
+                  </span>
                 </div>
-                <div>
-                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground block mb-1">
-                    Email Address
-                  </label>
-                  <Input type="email" placeholder="alex@domain.com" required/>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground block mb-1">
+                      Your Name
+                    </label>
+                    <Input
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Alexandria Morgan"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground block mb-1">
+                      Email Address
+                    </label>
+                    <Input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="alex@domain.com"
+                      required
+                    />
+                  </div>
                 </div>
-              </div>
+              )}
 
               <div>
                 <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground block mb-1">

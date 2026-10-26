@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Heart, ShoppingBag, Star, Truck, ShieldCheck, RotateCcw, Check, ChevronRight, Plus, Minus, Sparkles, MessageSquare, Clock, Eye, Flame, } from 'lucide-react';
+import { Heart, ShoppingBag, Star, Truck, ShieldCheck, RotateCcw, Check, ChevronRight, Plus, Minus, MessageSquare, Clock, Eye, Flame, } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useProductStore } from '@/store/productStore';
 import { useCartStore } from '@/store/cartStore';
@@ -14,6 +14,7 @@ import { Dialog, DialogHeader, DialogTitle, DialogDescription, DialogClose } fro
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
+import { showSnackbar } from '@/lib/snackbar';
 export function ProductDetailPage() {
     const { slug } = useParams();
     const navigate = useNavigate();
@@ -113,8 +114,13 @@ export function ProductDetailPage() {
             quantity,
         });
         setIsAddedFeedback(true);
-        toast.success('Added to Bag', {
-            description: `${quantity}x ${product.name} is ready in your cart.`,
+        const variantSuffix = [selectedColor, selectedSize, selectedConfig].filter(Boolean).join('-');
+        const addedItemId = variantSuffix ? `${product.id}-${variantSuffix}` : product.id;
+        showSnackbar(`Added ${quantity}x ${product.name} to Cart`, {
+            description: 'Item reserved in your shopping bag.',
+            onUndo: () => {
+                useCartStore.getState().removeItem(addedItemId);
+            },
         });
         setTimeout(() => setIsAddedFeedback(false), 2000);
     };
@@ -421,7 +427,7 @@ export function ProductDetailPage() {
       {/* Recently Viewed Products */}
       {(recentlyViewed || []).filter((p) => p?.id !== product?.id).length > 0 && (<section className="pt-10 border-t space-y-6">
           <div className="flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-foreground"/>
+            <Clock className="h-4 w-4 text-foreground"/>
             <h3 className="text-xl font-bold text-foreground">Recently Viewed</h3>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">

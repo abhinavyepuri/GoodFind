@@ -12,6 +12,7 @@ import settingsRoutes from './routes/settings.js'
 import searchRoutes from './routes/search.js'
 import authRoutes from './routes/auth.js'
 import addressRoutes from './routes/addresses.js'
+import User from './models/User.js'
 
 const { PORT = 5000, MONGO_URI } = process.env
 
@@ -21,6 +22,33 @@ if (!MONGO_URI) {
 }
 
 await connectDB(MONGO_URI)
+
+// Auto-seed/verify Admin user from environment variables
+try {
+  const adminEmail = (process.env.ADMIN_EMAIL || 'admin@goodfind.test').toLowerCase().trim()
+  const existingAdmin = await User.findOne({ email: adminEmail })
+  const adminPassword = process.env.ADMIN_PASSWORD || 'admingf'
+  if (!existingAdmin) {
+    const passwordHash = await User.hashPassword(adminPassword)
+    await User.create({
+      id: 'usr-admin-01',
+      email: adminEmail,
+      passwordHash,
+      name: process.env.ADMIN_NAME || 'GoodFind Admin',
+      role: 'admin',
+    })
+    console.log(`[Init] Admin account seeded: ${adminEmail}`)
+  } else {
+    const isMatch = await existingAdmin.verifyPassword(adminPassword)
+    if (!isMatch) {
+      existingAdmin.passwordHash = await User.hashPassword(adminPassword)
+      await existingAdmin.save()
+      console.log(`[Init] Admin password synchronized from .env`)
+    }
+  }
+} catch (adminErr) {
+  console.warn('[Init] Admin auto-seed check:', adminErr.message)
+}
 
 const app = express()
 

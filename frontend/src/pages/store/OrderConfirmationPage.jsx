@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { CheckCircle2, ArrowRight, Package, Truck, MapPin, Sparkles, Lock, User } from 'lucide-react';
+import { CheckCircle2, ArrowRight, Package, Truck, MapPin, ShieldCheck, Lock, User } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useProductStore } from '@/store/productStore';
 import { useAuthStore } from '@/store/authStore';
@@ -105,7 +105,7 @@ export function OrderConfirmationPage() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-start gap-3.5">
               <div className="h-10 w-10 rounded-2xl bg-primary/15 flex items-center justify-center text-primary shrink-0 mt-0.5">
-                <Sparkles className="h-5 w-5" />
+                <ShieldCheck className="h-5 w-5" />
               </div>
               <div className="space-y-1">
                 <h3 className="text-base font-bold text-foreground">

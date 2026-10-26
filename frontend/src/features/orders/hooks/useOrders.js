@@ -3,6 +3,7 @@ import { useProductStore } from '@/store/productStore';
 import { useCartStore } from '@/store/cartStore';
 import { useAuthStore } from '@/store/authStore';
 import { toast } from 'sonner';
+import { STATUS_TABS } from '../types';
 
 /**
  * Custom Hook for Order History management, filtering, and self-service actions
@@ -184,6 +185,8 @@ export function useOrders() {
     orders,
     filteredOrders,
     statusCounts,
+    tabCounts: statusCounts,
+    orderTabs: STATUS_TABS,
     searchQuery,
     setSearchQuery,
     activeTab,

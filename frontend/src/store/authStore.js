@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { toast } from 'sonner';
+import { mockCommunityUsers, mockCommunityAddresses } from '@/data/mockData';
 
 export const useAuthStore = create(
   persist(
@@ -85,15 +86,45 @@ export const useAuthStore = create(
         } catch {
           // Local fallback for offline/client-only demonstration
           const cleanEmail = email.trim().toLowerCase();
-          const fallbackUser = {
-            id: `usr-${Date.now()}`,
-            email: cleanEmail,
-            name: cleanEmail.split('@')[0],
-            phone: '',
-            role: 'customer',
-          };
+          const foundCommunityUser = mockCommunityUsers?.find((u) => u.email === cleanEmail);
+          const isUserAdmin = cleanEmail === 'admin@gf.test';
+
+          let fallbackUser;
+          let userAddresses = [];
+
+          if (foundCommunityUser) {
+            fallbackUser = {
+              id: foundCommunityUser.id,
+              email: foundCommunityUser.email,
+              name: foundCommunityUser.name,
+              phone: foundCommunityUser.phone || '',
+              role: foundCommunityUser.role || 'customer',
+              avatar: foundCommunityUser.avatar,
+            };
+            userAddresses = (mockCommunityAddresses || []).filter(
+              (a) => a.userId === foundCommunityUser.id
+            );
+          } else if (isUserAdmin) {
+            fallbackUser = {
+              id: 'usr-admin-01',
+              email: 'admin@gf.test',
+              name: 'GoodFind Admin',
+              phone: '+91 98200 11111',
+              role: 'admin',
+            };
+          } else {
+            fallbackUser = {
+              id: `usr-${Date.now()}`,
+              email: cleanEmail,
+              name: cleanEmail.split('@')[0],
+              phone: '',
+              role: 'customer',
+            };
+          }
+
           set({
             user: fallbackUser,
+            addresses: userAddresses,
             isAuthenticated: true,
             token: fallbackUser.id,
             isAuthModalOpen: false,
