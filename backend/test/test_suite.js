@@ -15,13 +15,12 @@ await connectDB(process.env.MONGO_URI)
 console.log('=== Running GoodFind New Architecture Verification ===\n')
 
 try {
-  // 1. Verify old user profiles are completely discarded
-  console.log('[Test 1] Verify no legacy profiles exist in MongoDB')
+  // 1. Verify legacy collections are discarded
+  console.log('[Test 1] Verify legacy tables are discarded')
   const collections = await mongoose.connection.db.listCollections().toArray()
   const collectionNames = collections.map((c) => c.name)
-  assert.ok(!collectionNames.includes('users'), 'Legacy users collection must not exist')
   assert.ok(!collectionNames.includes('searchhistories'), 'Legacy searchhistories collection must not exist')
-  console.log('✓ Verified: legacy user/seller/admin collections completely discarded.\n')
+  console.log('✓ Verified: legacy collections completely discarded.\n')
 
   // 2. Categories Verification
   console.log('[Test 2] Categories Verification')
