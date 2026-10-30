@@ -21,25 +21,78 @@ import { useCartStore } from '@/store/cartStore';
 import { useProductStore } from '@/store/productStore';
 import { formatPrice } from '@/lib/utils';
 
-export function AccountDropdown({ isOpen, onToggle, onClose }) {
+export function AccountDropdown({ isOpen, onToggle, onClose, onOpen }) {
   const navigate = useNavigate();
   const { user, isAuthenticated, logout } = useAuthStore();
   const wishlistItems = useWishlistStore((state) => state.items);
   const addItemToCart = useCartStore((state) => state.addItem);
-  const { products } = useProductStore();
+  const { products, orders: allOrders = [] } = useProductStore();
 
-  // Curated items for "Buy it again"
+  const timeoutRef = React.useRef(null);
+
+  const handleMouseEnter = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+    if (onOpen) {
+      onOpen();
+    } else if (onToggle && !isOpen) {
+      onToggle();
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    timeoutRef.current = setTimeout(() => {
+      if (onClose) onClose();
+    }, 180);
+  };
+
+  React.useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
+
+  // Show only genuine past purchased items from user's orders (never fake catalog items)
   const quickItems = React.useMemo(() => {
-    return products.slice(0, 3);
-  }, [products]);
+    if (!isAuthenticated || !user) return [];
+    const cleanEmail = (user.email || '').toLowerCase().trim();
+    const userOrders = (allOrders || []).filter(
+      (o) =>
+        (o.customer?.id && o.customer.id === user.id) ||
+        (o.customer?.email && o.customer.email?.toLowerCase().trim() === cleanEmail)
+    );
+    const seen = new Set();
+    const items = [];
+    userOrders.forEach((o) => {
+      (o.items || []).forEach((item) => {
+        if (!seen.has(item.productId)) {
+          seen.add(item.productId);
+          const catalogItem = products.find((p) => p.id === item.productId);
+          items.push({
+            id: item.productId,
+            name: item.name,
+            price: item.price,
+            image: item.image || catalogItem?.images?.[0] || catalogItem?.image,
+            slug: catalogItem?.slug || item.productId,
+          });
+        }
+      });
+    });
+    return items.slice(0, 3);
+  }, [allOrders, products, isAuthenticated, user]);
 
   const firstName = user?.name ? user.name.split(' ')[0] : 'User';
 
   return (
     <div
       className="relative"
-      onMouseEnter={onToggle}
-      onMouseLeave={onClose}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       {/* Trigger Button (Top Bar Style) */}
       <button
@@ -66,16 +119,21 @@ export function AccountDropdown({ isOpen, onToggle, onClose }) {
         </div>
       </button>
 
-      {/* Safe hover bridge */}
+      {/* Safe hover bridge preventing mouse gap flicker */}
       {isOpen && (
-        <div className="absolute -bottom-2.5 left-0 right-0 h-4 z-40" />
+        <div
+          className="absolute -bottom-3 -left-96 right-0 h-6 z-40"
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+        />
       )}
 
       {/* Amazon-Style Rich Dropdown Popover in Stylish Solid Black */}
       {isOpen && (
         <div
           className="absolute right-0 top-full mt-1.5 w-[760px] max-w-[94vw] rounded-3xl border border-white/10 bg-[#0d1117] text-white shadow-2xl p-5 z-50 animate-in fade-in-50 slide-in-from-top-2 duration-150"
-          onMouseEnter={onToggle}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
         >
           {/* Top Header / Profile Banner */}
           {!isAuthenticated ? (
@@ -137,37 +195,56 @@ export function AccountDropdown({ isOpen, onToggle, onClose }) {
                 </Link>
               </div>
 
-              <div className="space-y-3 pt-1">
-                {quickItems.map((item) => (
-                  <div key={item.id} className="flex items-center gap-3 group">
-                    <img
-                      src={item.image || item.images?.[0]}
-                      alt={item.name}
-                      className="h-12 w-12 rounded-xl object-cover border border-white/10 bg-white/5 shrink-0"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <Link
-                        to={`/product/${item.slug}`}
-                        onClick={onClose}
-                        className="font-medium text-zinc-200 hover:text-white text-[11px] line-clamp-1 block leading-tight"
-                      >
-                        {item.name}
-                      </Link>
-                      <p className="text-[11px] font-bold text-white mt-0.5">
-                        {formatPrice(item.price)}
-                      </p>
-                      <button
-                        type="button"
-                        onClick={() => addItemToCart(item, 1)}
-                        className="mt-1 px-2.5 py-1 rounded-lg bg-white/15 hover:bg-white text-white hover:text-zinc-950 font-bold text-[10px] transition-colors inline-flex items-center gap-1 border border-white/20 shadow-xs cursor-pointer"
-                      >
-                        <Plus className="h-2.5 w-2.5" />
-                        <span>Add to cart</span>
-                      </button>
+              {quickItems.length > 0 ? (
+                <div className="space-y-3 pt-1">
+                  {quickItems.map((item) => (
+                    <div key={item.id} className="flex items-center gap-3 group">
+                      <img
+                        src={item.image || item.images?.[0]}
+                        alt={item.name}
+                        className="h-12 w-12 rounded-xl object-cover border border-white/10 bg-white/5 shrink-0"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <Link
+                          to={`/product/${item.slug}`}
+                          onClick={onClose}
+                          className="font-medium text-zinc-200 hover:text-white text-[11px] line-clamp-1 block leading-tight"
+                        >
+                          {item.name}
+                        </Link>
+                        <p className="text-[11px] font-bold text-white mt-0.5">
+                          {formatPrice(item.price)}
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => addItemToCart(item, 1)}
+                          className="mt-1 px-2.5 py-1 rounded-lg bg-white/15 hover:bg-white text-white hover:text-zinc-950 font-bold text-[10px] transition-colors inline-flex items-center gap-1 border border-white/20 shadow-xs cursor-pointer"
+                        >
+                          <Plus className="h-2.5 w-2.5" />
+                          <span>Add to cart</span>
+                        </button>
+                      </div>
                     </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="py-5 px-3 text-center rounded-2xl bg-white/5 border border-white/5 space-y-1.5 mt-1">
+                  <div className="h-7 w-7 mx-auto rounded-full bg-white/10 flex items-center justify-center text-zinc-400">
+                    <Package className="h-3.5 w-3.5" />
                   </div>
-                ))}
-              </div>
+                  <p className="font-bold text-white text-xs">No past purchases yet</p>
+                  <p className="text-[11px] text-zinc-400 leading-relaxed">
+                    Items you buy will appear here so you can reorder with 1 click.
+                  </p>
+                  <Link
+                    to="/catalog"
+                    onClick={onClose}
+                    className="inline-block mt-1 text-[11px] font-semibold text-zinc-300 hover:text-white underline underline-offset-2"
+                  >
+                    Start shopping →
+                  </Link>
+                </div>
+              )}
             </div>
 
             {/* Column 2: "Your Lists" */}

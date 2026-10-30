@@ -14,6 +14,17 @@ import authRoutes from './routes/auth.js'
 import addressRoutes from './routes/addresses.js'
 import User from './models/User.js'
 
+import fs from 'node:fs'
+
+process.on('uncaughtException', (err) => {
+  try { fs.appendFileSync('debug.log', `[FATAL uncaughtException] ${err?.stack || err}\n`) } catch {}
+  console.error('[FATAL uncaughtException]', err)
+})
+process.on('unhandledRejection', (reason) => {
+  try { fs.appendFileSync('debug.log', `[FATAL unhandledRejection] ${reason?.stack || reason}\n`) } catch {}
+  console.error('[FATAL unhandledRejection]', reason)
+})
+
 const { PORT = 5000, MONGO_URI } = process.env
 
 if (!MONGO_URI) {
@@ -92,6 +103,9 @@ app.use('/api/user/addresses', addressRoutes)
 // Central error handler
 app.use((err, req, res, next) => {
   console.error(err.name, err.message)
+  if (res.headersSent) {
+    return next(err)
+  }
   if (err.status) {
     return res.status(err.status).json({ error: err.message })
   }
@@ -104,4 +118,4 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: err.message || 'Internal server error' })
 })
 
-app.listen(PORT, () => console.log(`GoodFind API running on http://localhost:${PORT}`))
+app.listen(PORT, '0.0.0.0', () => console.log(`GoodFind API running on http://localhost:${PORT}`))

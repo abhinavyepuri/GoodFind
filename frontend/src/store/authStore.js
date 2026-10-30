@@ -2,6 +2,15 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { toast } from 'sonner';
 import { mockCommunityUsers, mockCommunityAddresses } from '@/data/mockData';
+import { useProductStore } from './productStore';
+
+const refreshClientStateOnAuth = () => {
+  try {
+    // Evict old mock data/orders from local storage so only DB-grounded session data persists
+    localStorage.removeItem('goodfind-commerce-storage');
+    useProductStore.setState({ orders: [], currentUser: null });
+  } catch {}
+};
 
 export const useAuthStore = create(
   persist(
@@ -65,6 +74,7 @@ export const useAuthStore = create(
           });
 
           if (res.ok) {
+            refreshClientStateOnAuth();
             const data = await res.json();
             set({
               user: data.user,
@@ -146,6 +156,7 @@ export const useAuthStore = create(
           });
 
           if (res.ok) {
+            refreshClientStateOnAuth();
             const data = await res.json();
             set({
               user: data.user,
@@ -215,6 +226,7 @@ export const useAuthStore = create(
         } catch {
           // Ignore network errors on logout
         }
+        refreshClientStateOnAuth();
         set({
           user: null,
           addresses: [],

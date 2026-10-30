@@ -202,6 +202,10 @@ export function Navbar() {
             {/* Hello, "Name" / Account & Lists Dropdown (Requirement 2) */}
             <AccountDropdown
               isOpen={isAccountDropdownOpen}
+              onOpen={() => {
+                setIsAccountDropdownOpen(true);
+                setIsProductsDropdownOpen(false);
+              }}
               onToggle={() => {
                 setIsAccountDropdownOpen(!isAccountDropdownOpen);
                 setIsProductsDropdownOpen(false);

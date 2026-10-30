@@ -5,11 +5,11 @@ import { mockProducts, mockCategories, mockOrders, mockReviews, mockCoupons, ini
 export const useProductStore = create(persist((set, get) => ({
     products: mockProducts,
     categories: mockCategories,
-    orders: mockOrders,
+    orders: [],
     reviews: mockReviews,
     coupons: mockCoupons,
     settings: initialStoreSettings,
-    currentUser: mockCustomer,
+    currentUser: null,
     compareItems: [],
     activeRole: 'customer',
     setActiveRole: (role) => set({ activeRole: role }),
@@ -386,14 +386,17 @@ export const useProductStore = create(persist((set, get) => ({
         set({
             products: mockProducts,
             categories: mockCategories,
-            orders: mockOrders,
+            orders: [],
             reviews: mockReviews,
             coupons: mockCoupons,
             settings: initialStoreSettings,
-            currentUser: mockCustomer,
+            currentUser: null,
             compareItems: [],
         });
     },
 }), {
     name: 'goodfind-commerce-storage',
+    partialize: (state) => ({
+        compareItems: state.compareItems || [],
+    }),
 }));

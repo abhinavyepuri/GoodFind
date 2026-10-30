@@ -12,14 +12,14 @@ import { Select } from '@/components/ui/select';
 export function CheckoutPage() {
     const navigate = useNavigate();
     const { items, getSubtotal, getDiscount, getShipping, getTax, appliedCoupon, clearCart } = useCartStore();
-    const { currentUser, createOrder } = useProductStore();
+    const { createOrder } = useProductStore();
     const { user, addresses, isAuthenticated, openAuthModal, register, addAddress } = useAuthStore();
 
     // Form Fields
     const [step, setStep] = React.useState(1);
-    const [email, setEmail] = React.useState(user?.email || currentUser?.email || '');
-    const [fullName, setFullName] = React.useState(user?.name || currentUser?.name || '');
-    const [phone, setPhone] = React.useState(user?.phone || currentUser?.phone || '');
+    const [email, setEmail] = React.useState(user?.email || '');
+    const [fullName, setFullName] = React.useState(user?.name || '');
+    const [phone, setPhone] = React.useState(user?.phone || '');
 
     // Saved Address Book selection state
     const [selectedAddressId, setSelectedAddressId] = React.useState('');
@@ -33,14 +33,14 @@ export function CheckoutPage() {
     // Shipping Address fields
     const defaultAddr = (addresses && addresses.length > 0)
         ? (addresses.find((a) => a.isDefault) || addresses[0])
-        : (currentUser.addresses?.find((a) => a.isDefault) || currentUser.addresses?.[0]);
+        : null;
 
-    const [street, setStreet] = React.useState(defaultAddr?.street || '450 West 14th Street');
-    const [apartment, setApartment] = React.useState(defaultAddr?.apartment || 'Suite 8B');
-    const [city, setCity] = React.useState(defaultAddr?.city || 'New York');
-    const [state, setState] = React.useState(defaultAddr?.state || 'NY');
-    const [postalCode, setPostalCode] = React.useState(defaultAddr?.postalCode || '10014');
-    const [country, setCountry] = React.useState(defaultAddr?.country || 'United States');
+    const [street, setStreet] = React.useState(defaultAddr?.street || '');
+    const [apartment, setApartment] = React.useState(defaultAddr?.apartment || '');
+    const [city, setCity] = React.useState(defaultAddr?.city || '');
+    const [state, setState] = React.useState(defaultAddr?.state || '');
+    const [postalCode, setPostalCode] = React.useState(defaultAddr?.postalCode || '');
+    const [country, setCountry] = React.useState(defaultAddr?.country || 'India');
 
     // Shipping Method
     const [shippingMethod, setShippingMethod] = React.useState('standard');
@@ -240,6 +240,17 @@ export function CheckoutPage() {
                         : 'Credit Card •••• 4242',
                 shippingAddress: finalAddress,
             });
+
+            // Persist order directly to MongoDB database
+            fetch('/api/orders', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify(newOrder),
+            }).catch((err) => {
+                console.warn('Could not sync new order to DB:', err);
+            });
+
             clearCart();
             setIsSubmitting(false);
             navigate(`/order-confirmation/${newOrder?.orderNumber || orderNumber}`);

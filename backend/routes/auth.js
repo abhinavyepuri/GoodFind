@@ -11,14 +11,15 @@ const router = express.Router()
 router.post(
   '/register',
   asyncHandler(async (req, res) => {
-    const { email, password, name, phone, address, orderNumber, orderId } = req.body
+    const { email, password, name, phone, address, orderNumber, orderId } = req.body || {}
 
-    const cleanEmail = (email || '').trim().toLowerCase()
+    const cleanEmail = String(email || '').trim().toLowerCase()
     if (!cleanEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
       return res.status(400).json({ error: 'A valid email address is required.' })
     }
 
-    if (!password || password.length < 6) {
+    const cleanPassword = String(password || '')
+    if (!cleanPassword || cleanPassword.length < 6) {
       return res.status(400).json({ error: 'Password must be at least 6 characters long.' })
     }
 
@@ -27,33 +28,43 @@ router.post(
       return res.status(409).json({ error: 'An account with that email already exists.' })
     }
 
-    const passwordHash = await User.hashPassword(password)
+    const passwordHash = await User.hashPassword(cleanPassword)
     const userId = `usr-${Date.now()}`
+    const cleanName = (String(name || '').trim() || cleanEmail.split('@')[0])
+    const cleanPhone = String(phone || '').trim()
+
     const user = await User.create({
       id: userId,
       email: cleanEmail,
       passwordHash,
-      name: (name || cleanEmail.split('@')[0]).trim(),
-      phone: (phone || '').trim(),
+      name: cleanName,
+      phone: cleanPhone,
       role: 'customer',
     })
 
     // Create initial saved address if supplied
     let savedAddresses = []
     if (address && (address.street || address.street_address)) {
-      const street = address.street || address.street_address || ''
+      const street = String(address.street || address.street_address || '').trim()
+      const city = String(address.city || '').trim() || 'Mumbai'
+      const state = String(address.state || '').trim() || 'Maharashtra'
+      const postalCode = String(address.postalCode || address.postal_code || address.zip || '').trim() || '400050'
+      const country = String(address.country || '').trim() || 'India'
+      const fullName = String(address.fullName || address.full_name || cleanName).trim() || cleanName
+      const phoneAddr = String(address.phone || address.phone_number || cleanPhone || '').trim()
+
       const newAddr = await Address.create({
         id: `addr-${Date.now()}`,
         userId: user.id,
-        title: address.title || 'Default Address',
-        fullName: address.fullName || address.full_name || user.name,
+        title: String(address.title || 'Default Address').trim(),
+        fullName,
         street,
-        apartment: address.apartment || '',
-        city: address.city || '',
-        state: address.state || '',
-        postalCode: address.postalCode || address.postal_code || address.zip || '',
-        country: address.country || 'United States',
-        phone: address.phone || address.phone_number || user.phone,
+        apartment: String(address.apartment || '').trim(),
+        city,
+        state,
+        postalCode,
+        country,
+        phone: phoneAddr,
         isDefault: true,
       })
       savedAddresses = [newAddr]

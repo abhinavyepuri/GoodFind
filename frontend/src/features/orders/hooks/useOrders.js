@@ -21,17 +21,62 @@ export function useOrders() {
   const [activeTab, setActiveTab] = React.useState('all');
   const [dateRange, setDateRange] = React.useState('all');
 
-  // Filter orders to active user if authenticated and has matching orders
+  const [dbOrders, setDbOrders] = React.useState([]);
+  const [isLoading, setIsLoading] = React.useState(false);
+
+  // Synchronize orders directly with the backend database for the authenticated user
+  React.useEffect(() => {
+    if (!isAuthenticated || !user) {
+      setDbOrders([]);
+      return;
+    }
+
+    let isMounted = true;
+    const fetchUserOrders = async () => {
+      setIsLoading(true);
+      try {
+        const target = user.id || user.email;
+        const res = await fetch(`/api/orders/user/${encodeURIComponent(target)}`, {
+          credentials: 'include',
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (isMounted && Array.isArray(data)) {
+            setDbOrders(data);
+          }
+        }
+      } catch (err) {
+        console.warn('Could not retrieve user orders from DB:', err);
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    };
+
+    fetchUserOrders();
+    return () => {
+      isMounted = false;
+    };
+  }, [isAuthenticated, user?.id, user?.email]);
+
+  // Combine DB orders with any newly placed in-session orders for this user
   const orders = React.useMemo(() => {
-    if (!isAuthenticated || !user) return allOrders;
+    if (!isAuthenticated || !user) return [];
     const cleanEmail = (user.email || '').toLowerCase().trim();
-    const userMatched = allOrders.filter(
-      (o) =>
+
+    const combined = [...dbOrders];
+    const existingIds = new Set(dbOrders.map((o) => o.id || o.orderNumber));
+
+    (allOrders || []).forEach((o) => {
+      const isUserOrder =
         (o.customer?.id && o.customer.id === user.id) ||
-        (o.customer?.email && o.customer.email.toLowerCase().trim() === cleanEmail)
-    );
-    return userMatched.length > 0 ? userMatched : allOrders;
-  }, [allOrders, isAuthenticated, user]);
+        (o.customer?.email && o.customer.email.toLowerCase().trim() === cleanEmail);
+      if (isUserOrder && !existingIds.has(o.id) && !existingIds.has(o.orderNumber)) {
+        combined.push(o);
+      }
+    });
+
+    return combined.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+  }, [dbOrders, allOrders, isAuthenticated, user]);
 
   // Filtered orders with multi-attribute search and date filtering
   const filteredOrders = React.useMemo(() => {
@@ -160,23 +205,46 @@ export function useOrders() {
   );
 
   const cancelOrder = React.useCallback(
-    (orderId, details) => {
+    async (orderId, details) => {
       if (cancelOrderAction) {
         cancelOrderAction(orderId, details);
-        toast.success(`Order #${orderId} was cancelled successfully. Refund initiated.`);
       }
+      setDbOrders((prev) =>
+        prev.map((o) => (o.id === orderId || o.orderNumber === orderId ? { ...o, status: 'cancelled' } : o))
+      );
+      try {
+        await fetch(`/api/orders/${orderId}/status`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ status: 'cancelled', note: details?.reason || 'Cancelled by customer' }),
+        });
+      } catch {}
+      toast.success(`Order #${orderId} was cancelled successfully. Refund initiated.`);
     },
     [cancelOrderAction]
   );
 
   const requestReturn = React.useCallback(
-    (orderId, details) => {
+    async (orderId, details) => {
+      let res = null;
       if (requestReturnAction) {
-        const res = requestReturnAction(orderId, details);
-        toast.success(`Return authorized. Prepaid shipping label ${res.trackingNumber} generated.`);
-        return res;
+        res = requestReturnAction(orderId, details);
       }
-      return null;
+      setDbOrders((prev) =>
+        prev.map((o) => (o.id === orderId || o.orderNumber === orderId ? { ...o, status: 'returned' } : o))
+      );
+      try {
+        await fetch(`/api/orders/${orderId}/status`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ status: 'returned', note: details?.reason || 'Return requested by customer' }),
+        });
+      } catch {}
+      const tracking = res?.trackingNumber || `RET-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+      toast.success(`Return authorized. Prepaid shipping label ${tracking} generated.`);
+      return res || { trackingNumber: tracking };
     },
     [requestReturnAction]
   );

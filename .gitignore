@@ -13,5 +13,8 @@ npm-debug.log*
 Thumbs.db
 .vscode/
 .idea/
+
 # Design assets and mockups
 UI/
+
+tests/
