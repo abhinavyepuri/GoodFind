@@ -12,6 +12,7 @@ import settingsRoutes from './routes/settings.js'
 import searchRoutes from './routes/search.js'
 import authRoutes from './routes/auth.js'
 import addressRoutes from './routes/addresses.js'
+import healthRoutes from './routes/health.js'
 import User from './models/User.js'
 
 import fs from 'node:fs'
@@ -63,12 +64,17 @@ try {
 
 const app = express()
 
+// Trust Render's reverse proxy for secure cookies and correct protocol detection
+app.set('trust proxy', 1)
+
 app.use(express.json())
 
-// CORS headers for development
+// CORS headers supporting credentials for deployed frontend
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*')
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
+  const origin = req.headers.origin || '*'
+  res.header('Access-Control-Allow-Origin', origin)
+  res.header('Access-Control-Allow-Credentials', 'true')
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization')
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
   if (req.method === 'OPTIONS') {
     return res.sendStatus(200)
@@ -84,7 +90,7 @@ app.use(
     cookie: {
       maxAge: 30 * 24 * 60 * 60 * 1000,
       httpOnly: true,
-      sameSite: 'lax',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       secure: process.env.NODE_ENV === 'production',
     },
   })
@@ -99,6 +105,8 @@ app.use('/api/settings', settingsRoutes)
 app.use('/api/search', searchRoutes)
 app.use('/api/auth', authRoutes)
 app.use('/api/user/addresses', addressRoutes)
+app.use('/api/health', healthRoutes)
+app.use('/health', healthRoutes)
 
 // Central error handler
 app.use((err, req, res, next) => {
@@ -118,4 +126,24 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: err.message || 'Internal server error' })
 })
 
-app.listen(PORT, '0.0.0.0', () => console.log(`GoodFind API running on http://localhost:${PORT}`))
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`GoodFind API running on http://localhost:${PORT}`)
+
+  // Periodic health keep-alive ping (14 minutes default, configurable via PING_INTERVAL_MINS)
+  const PING_INTERVAL_MINS = Number(process.env.PING_INTERVAL_MINS) || 14
+  const PING_INTERVAL_MS = PING_INTERVAL_MINS * 60 * 1000
+  const baseUrl = process.env.RENDER_EXTERNAL_URL || process.env.APP_URL || ''
+  const pingUrl = baseUrl
+    ? `${baseUrl.replace(/\/$/, '')}/api/health`
+    : `http://127.0.0.1:${PORT}/api/health`
+
+  const pingTimer = setInterval(async () => {
+    try {
+      const res = await fetch(pingUrl)
+      console.log(`[Health Ping] ${new Date().toISOString()} -> ${pingUrl} (${res.status})`)
+    } catch (err) {
+      console.warn('[Health Ping Error]', err.message)
+    }
+  }, PING_INTERVAL_MS)
+  pingTimer.unref()
+})

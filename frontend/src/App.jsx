@@ -41,6 +41,17 @@ function PageFallback() {
     </div>);
 }
 export function App() {
+    React.useEffect(() => {
+        // Heartbeat: ping backend health endpoint every 14 minutes to maintain active connection
+        const PING_INTERVAL_MS = 14 * 60 * 1000;
+        const pingHealth = () => {
+            fetch('/api/health').catch(() => {});
+        };
+        pingHealth();
+        const intervalId = setInterval(pingHealth, PING_INTERVAL_MS);
+        return () => clearInterval(intervalId);
+    }, []);
+
     return (
       <HashRouter>
         <ScrollToTop />
