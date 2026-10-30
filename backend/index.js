@@ -3,6 +3,7 @@ import express from 'express'
 import { connectDB } from './db.js'
 
 import session from 'express-session'
+import MongoStore from 'connect-mongo'
 import productRoutes from './routes/products.js'
 import categoryRoutes from './routes/categories.js'
 import orderRoutes from './routes/orders.js'
@@ -87,6 +88,11 @@ app.use(
     secret: process.env.SESSION_SECRET || 'goodfind-session-secret-key-123',
     resave: false,
     saveUninitialized: false,
+    store: MongoStore.create({
+      mongoUrl: MONGO_URI,
+      ttl: 30 * 24 * 60 * 60, // 30 days
+      autoRemove: 'native',
+    }),
     cookie: {
       maxAge: 30 * 24 * 60 * 60 * 1000,
       httpOnly: true,
