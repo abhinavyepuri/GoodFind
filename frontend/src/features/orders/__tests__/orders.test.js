@@ -37,20 +37,22 @@ describe('Orders Feature - Types & Logic', () => {
   });
 
   describe('isOrderReturnable', () => {
-    it('returns true for delivered order within 30 days', () => {
+    it('returns true for delivered order within 7 days', () => {
       const recentOrder = {
         status: 'delivered',
-        deliveredAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+        deliveredAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
       };
-      expect(isOrderReturnable(recentOrder, 30)).toBe(true);
+      expect(isOrderReturnable(recentOrder, 7)).toBe(true);
+      expect(isOrderReturnable(recentOrder)).toBe(true);
     });
 
-    it('returns false for delivered order older than 30 days', () => {
+    it('returns false for delivered order older than 7 days', () => {
       const oldOrder = {
         status: 'delivered',
-        deliveredAt: new Date(Date.now() - 40 * 24 * 60 * 60 * 1000).toISOString(),
+        deliveredAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
       };
-      expect(isOrderReturnable(oldOrder, 30)).toBe(false);
+      expect(isOrderReturnable(oldOrder, 7)).toBe(false);
+      expect(isOrderReturnable(oldOrder)).toBe(false);
     });
 
     it('returns false for non-delivered orders', () => {

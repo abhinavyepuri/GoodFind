@@ -19,3 +19,4 @@ export { SavedAddressBook } from './components/SavedAddressBook';
 // Pages
 export { OrderHistoryPage } from './pages/OrderHistoryPage';
 export { OrderDetailView } from './pages/OrderDetailView';
+export { OrderDetailView } from './pages/OrderDetailView';

@@ -57,7 +57,7 @@ const HERO_SLIDES = [
     season: 'MINIMALIST WARDROBE',
     title: 'Tailored Everyday Linen & Organic Sets.',
     subtitle: 'Breathable natural weaves, modern relaxed silhouettes, and sustainable hand-stitched everyday essentials for all-day comfort.',
-    priceBadge: 'Under ₹399 • 30-Day Doorstep Returns',
+    priceBadge: 'Under ₹399 • 7-Day Doorstep Returns',
     primaryCtaText: 'Shop Wardrobe Finds',
     primaryCtaLink: '/catalog?category=fashion',
     secondaryCtaText: 'Explore Fashion',
@@ -141,7 +141,7 @@ export function HomePage() {
             key={slide.id}
             className="absolute inset-0 h-full w-full object-cover object-center brightness-[0.72] transition-all duration-700 ease-out"
           />
-          {/* Dramatic Luxury Vignette Overlay */}
+          {/* Editorial Vignette Overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-black/20" />
           <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
 

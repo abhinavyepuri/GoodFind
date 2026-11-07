@@ -327,7 +327,7 @@ export function ProductDetailPage() {
             </div>
             <div className="flex flex-col items-center gap-1 p-2 rounded-xl bg-muted/30">
               <RotateCcw className="h-4 w-4 text-primary"/>
-              <span>30-Day Open Box Guarantee</span>
+              <span>7-Day Open Box Guarantee</span>
             </div>
             <div className="flex flex-col items-center gap-1 p-2 rounded-xl bg-muted/30">
               <ShieldCheck className="h-4 w-4 text-primary"/>

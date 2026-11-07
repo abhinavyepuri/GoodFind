@@ -1,0 +1,218 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "GoodFind Commerce API",
+    "description": "Production REST API specification for the GoodFind direct-to-consumer commerce storefront and order management engine.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "GoodFind Engineering",
+      "url": "https://goodfind-shop.onrender.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://goodfind-backend-1175.onrender.com",
+      "description": "Production Render Backend Server"
+    },
+    {
+      "url": "http://localhost:5000",
+      "description": "Local Development Server"
+    }
+  ],
+  "paths": {
+    "/api/health": {
+      "get": {
+        "summary": "Lightweight Keepalive Ping",
+        "description": "Zero-dependency health probe for uptime monitors and container orchestration. Bypasses database queries to prevent cold sleep on Render.",
+        "responses": {
+          "200": {
+            "description": "Service is healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": { "type": "string", "example": "ok" },
+                    "timestamp": { "type": "string", "format": "date-time" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/register": {
+      "post": {
+        "summary": "Register a new user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password", "name"],
+                "properties": {
+                  "name": { "type": "string", "example": "Alexandria Morgan" },
+                  "email": { "type": "string", "format": "email", "example": "alex@goodfind.io" },
+                  "password": { "type": "string", "format": "password", "example": "SecurePass123!" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "User created and authenticated session established" },
+          "400": { "description": "Validation error or email already in use" }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "summary": "Authenticate user session",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password"],
+                "properties": {
+                  "email": { "type": "string", "format": "email", "example": "alex@goodfind.io" },
+                  "password": { "type": "string", "format": "password", "example": "SecurePass123!" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Session authenticated successfully" },
+          "401": { "description": "Invalid credentials" }
+        }
+      }
+    },
+    "/api/auth/logout": {
+      "post": {
+        "summary": "Terminate user session",
+        "responses": {
+          "200": { "description": "Session destroyed" }
+        }
+      }
+    },
+    "/api/auth/me": {
+      "get": {
+        "summary": "Get authenticated user profile",
+        "responses": {
+          "200": { "description": "Profile of current session user" },
+          "401": { "description": "Unauthenticated" }
+        }
+      }
+    },
+    "/api/products": {
+      "get": {
+        "summary": "List catalog products",
+        "parameters": [
+          { "name": "category", "in": "query", "schema": { "type": "string" } },
+          { "name": "search", "in": "query", "schema": { "type": "string" } },
+          { "name": "sort", "in": "query", "schema": { "type": "string", "enum": ["featured", "price-low", "price-high", "rating"] } }
+        ],
+        "responses": {
+          "200": { "description": "Array of product items" }
+        }
+      }
+    },
+    "/api/products/{id}": {
+      "get": {
+        "summary": "Get single product by ID or slug",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Product details" },
+          "404": { "description": "Product not found" }
+        }
+      }
+    },
+    "/api/categories": {
+      "get": {
+        "summary": "List all product categories",
+        "responses": {
+          "200": { "description": "Array of categories" }
+        }
+      }
+    },
+    "/api/orders": {
+      "post": {
+        "summary": "Create a new order",
+        "description": "Places order, decreases inventory atomically, saves customer address snapshot, and returns tracking metadata.",
+        "responses": {
+          "201": { "description": "Order created successfully" },
+          "400": { "description": "Validation failure or out of stock" }
+        }
+      }
+    },
+    "/api/orders/user/{id}": {
+      "get": {
+        "summary": "List orders for specific user",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Array of orders for the user" }
+        }
+      }
+    },
+    "/api/orders/{id}/status": {
+      "put": {
+        "summary": "Update order status (Self-service cancellation or return)",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["status"],
+                "properties": {
+                  "status": { "type": "string", "enum": ["placed", "processing", "shipped", "delivered", "cancelled", "returned"] },
+                  "note": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Order status updated" },
+          "400": { "description": "Invalid status transition" }
+        }
+      }
+    },
+    "/api/coupons/validate": {
+      "post": {
+        "summary": "Validate discount coupon code",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["code", "subtotal"],
+                "properties": {
+                  "code": { "type": "string", "example": "WELCOME10" },
+                  "subtotal": { "type": "number", "example": 250 }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Coupon validation result" },
+          "404": { "description": "Invalid or expired coupon" }
+        }
+      }
+    }
+  }
+}
+

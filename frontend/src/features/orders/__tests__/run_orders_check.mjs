@@ -28,21 +28,21 @@ assert.strictEqual(isOrderCancellable({ status: 'cancelled' }), false, 'already 
 assert.strictEqual(isOrderCancellable(null), false, 'null order should return false');
 console.log('✔ Cancellation eligibility rules passed.');
 
-// 3. Return eligibility rules (30-day policy window for delivered items)
+// 3. Return eligibility rules (7-day policy window for delivered items)
 const recentDelivered = {
   status: 'delivered',
-  createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+  createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
 };
 const expiredDelivered = {
   status: 'delivered',
-  createdAt: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000).toISOString(),
+  createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
 };
 assert.strictEqual(isOrderReturnable(recentDelivered), true, 'recent delivered order should be returnable');
-assert.strictEqual(isOrderReturnable(expiredDelivered), false, 'delivered order past 30 days should NOT be returnable');
+assert.strictEqual(isOrderReturnable(expiredDelivered), false, 'delivered order past 7 days should NOT be returnable');
 assert.strictEqual(isOrderReturnable({ status: 'processing' }), false, 'processing order should NOT be returnable');
 assert.strictEqual(isOrderReturnable({ status: 'shipped' }), false, 'shipped order should NOT be returnable');
 assert.strictEqual(isOrderReturnable(null), false, 'null order should return false');
-console.log('✔ Return & replacement 30-day window eligibility rules passed.');
+console.log('✔ Return & replacement 7-day window eligibility rules passed.');
 
 // 4. Split shipment derivations
 const multiItemOrder = {

@@ -18,3 +18,12 @@ Thumbs.db
 UI/
 
 tests/
+
+# Parametric Community Generator (local developer tooling)
+community-generator/
+
+# Graphify knowledge graph outputs & audits
+graphify-out/
+.graphify*
+*.audit.json
+

@@ -22,10 +22,10 @@ export function ShippingPolicyPage() {
 }
 export function ReturnsPolicyPage() {
     return (<div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-6">
-      <h1 className="text-3xl font-extrabold text-foreground tracking-tight">30-Day Return & Exchange Policy</h1>
+      <h1 className="text-3xl font-extrabold text-foreground tracking-tight">7-Day Return & Exchange Policy</h1>
       <div className="prose dark:prose-invert text-muted-foreground text-sm space-y-4 leading-relaxed">
         <p>
-          We believe high-end objects should earn their place in your home and workspace. If an item does not meet your personal aesthetic or tactile standards, we gladly accept returns within 30 calendar days of delivery.
+          We believe high-end objects should earn their place in your home and workspace. If an item does not meet your personal aesthetic or tactile standards, we gladly accept returns within 7 calendar days of delivery.
         </p>
         <h3 className="text-base font-bold text-foreground">Hassle-Free Prepaid Labels</h3>
         <p>
@@ -65,7 +65,7 @@ export function TermsOfServicePage() {
         </p>
         <h3 className="text-base font-bold text-foreground">Demonstration Notice</h3>
         <p>
-          GoodFind is a premium frontend e-commerce demonstration designed with modern React architecture, client-side state management, and accessible responsive interfaces. All checkout payments, tracking events, and order numbers are simulated.
+          GoodFind is a direct-to-consumer e-commerce storefront demonstration designed with modern React architecture, client-side state management, and accessible responsive interfaces. All checkout payments, tracking events, and order numbers are simulated.
         </p>
         <h3 className="text-base font-bold text-foreground">Intellectual Property</h3>
         <p>

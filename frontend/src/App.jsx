@@ -12,7 +12,7 @@ const ProductDetailPage = React.lazy(() => import('@/pages/store/ProductDetailPa
 const CartPage = React.lazy(() => import('@/pages/store/CartPage').then((m) => ({ default: m.CartPage })));
 const CheckoutPage = React.lazy(() => import('@/pages/store/CheckoutPage').then((m) => ({ default: m.CheckoutPage })));
 const OrderConfirmationPage = React.lazy(() => import('@/pages/store/OrderConfirmationPage').then((m) => ({ default: m.OrderConfirmationPage })));
-const OrderDetailPage = React.lazy(() => import('@/pages/store/OrderDetailPage').then((m) => ({ default: m.OrderDetailPage })));
+const OrderDetailView = React.lazy(() => import('@/features/orders/pages/OrderDetailView').then((m) => ({ default: m.default || m.OrderDetailView })));
 const OrderHistoryPage = React.lazy(() => import('@/features/orders/pages/OrderHistoryPage').then((m) => ({ default: m.default || m.OrderHistoryPage })));
 const WishlistPage = React.lazy(() => import('@/pages/store/WishlistPage').then((m) => ({ default: m.WishlistPage })));
 const FaqPage = React.lazy(() => import('@/pages/store/FaqPage').then((m) => ({ default: m.FaqPage })));
@@ -68,8 +68,8 @@ export function App() {
               <Route path="/order-confirmation/:orderNumber" element={<OrderConfirmationPage />}/>
               <Route path="/account/orders" element={<OrderHistoryPage />}/>
               <Route path="/orders" element={<OrderHistoryPage />}/>
-              <Route path="/account/orders/:orderId" element={<OrderDetailPage />}/>
-              <Route path="/orders/:orderId" element={<OrderDetailPage />}/>
+              <Route path="/account/orders/:orderId" element={<OrderDetailView />}/>
+              <Route path="/orders/:orderId" element={<OrderDetailView />}/>
               <Route path="/wishlist" element={<WishlistPage />}/>
               <Route path="/faq" element={<FaqPage />}/>
               <Route path="/contact" element={<ContactPage />}/>

@@ -32,7 +32,7 @@ export function InvoiceModal({ order, isOpen, onClose }) {
               </Badge>
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              GoodFind Luxury Commerce Inc. • GSTIN / EIN Registered
+              GoodFind Commerce Inc. • GSTIN / EIN Registered
             </p>
           </div>
 

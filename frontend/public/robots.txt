@@ -1,0 +1,35 @@
+# GoodFind Robots Exclusion Protocol
+# Production URL: https://goodfind-shop.onrender.com/
+
+User-agent: *
+Allow: /
+Allow: /llms.txt
+Allow: /openapi.json
+Disallow: /api/admin/
+Disallow: /account/
+
+# LLM Crawler & AI Agent Directives
+User-agent: GPTBot
+Allow: /
+Allow: /llms.txt
+Allow: /openapi.json
+
+User-agent: ClaudeBot
+Allow: /
+Allow: /llms.txt
+Allow: /openapi.json
+
+User-agent: Google-Extended
+Allow: /
+Allow: /llms.txt
+Allow: /openapi.json
+
+User-agent: PerplexityBot
+Allow: /
+Allow: /llms.txt
+Allow: /openapi.json
+
+# Documentation for AI Crawlers and Search Engines
+# Machine-readable overview: https://goodfind-shop.onrender.com/llms.txt
+# OpenAPI 3.0 API Schema: https://goodfind-shop.onrender.com/openapi.json
+

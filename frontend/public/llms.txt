@@ -1,0 +1,50 @@
+# GoodFind
+
+> Curated direct-to-consumer commerce storefront engineered for workspace essentials, studio audio gear, everyday linen apparel, and handcrafted home provisions. Directly sourced from independent makers.
+
+## Core Identity & Positioning
+- **Name**: GoodFind
+- **Type**: Curated Direct-to-Consumer (D2C) E-Commerce Storefront
+- **Audience**: Conscious modern consumers seeking high-durability workspace tools, tactile audio gear, organic linen apparel, and handcrafted living objects with transparent material origins.
+- **Differentiators**:
+  - Independent artisan sourcing with direct manufacturer warranties.
+  - Transparent material specifications (solid walnut, Japanese switches, linen weaves).
+  - 7-day doorstep return guarantee with complimentary prepaid shipping labels.
+  - Split shipment tracking with real-time milestone stepper and self-service cancellation.
+
+## Key Policies
+- **Return Policy**: 7 calendar days from delivery date for all delivered orders with prepaid carrier return labels.
+- **Shipping**: Free carbon-neutral 2-day delivery on domestic orders over ₹150 / $50.
+- **Warranty**: 1-to-2 year comprehensive manufacturer/artisan warranties on all hardware and furniture.
+- **Currency Support**: Dual currency toggle supporting INR (₹) and USD ($).
+
+## Primary Routes
+- `/`: Home page featuring editorial carousel, category grids, and seasonal highlights.
+- `/#/catalog`: Full searchable and filterable product catalog (33+ items across 8 categories).
+- `/#/category/:slug`: Category-specific catalogs (electronics, fashion, home-living, beauty, pantry, digital, books-stationery, accessories).
+- `/#/product/:id`: Rich product detail page with image gallery, variant selectors, tech specs, and customer reviews.
+- `/#/cart`: Shopping bag with quantity adjustments, shipping threshold calculators, and coupon redemption.
+- `/#/checkout`: Multi-step checkout with real-time validation, address selection, payment modes, and instant confirmation.
+- `/#/account/orders`: User order history dashboard with multi-status tabs (All, Processing, In Transit, Delivered, Cancelled, Returns), tracking modal, invoice generation, and 7-day self-service returns.
+- `/#/returns`: Official 7-Day Return and Exchange policy statement.
+- `/#/faq`: Frequently asked questions and guarantee details.
+- `/llms.txt`: This machine-readable system overview.
+- `/openapi.json`: OpenAPI 3.0 specification for GoodFind's backend REST API.
+
+## Catalog Categories
+1. **Workspace & Electronics**: Standing desks, mechanical keyboards, 4K studio displays, wireless headphones.
+2. **Fashion & Apparel**: Organic linen shirts, Japanese selvedge denim, weatherproof commuter jackets.
+3. **Home & Living**: Hand-thrown ceramic tableware, ergonomic lumbar chairs, ambient task lighting.
+4. **Pantry & Provisions**: Single-origin Ethiopian Yirgacheffe coffee, ceremonial grade Uji matcha.
+5. **Books & Stationery**: Smyth-sewn archival notebooks, brass heavyweight rollerball pens.
+6. **Accessories**: Full-grain leather desk pads, titanium carabiners, minimal card sleeves.
+
+## API Documentation
+The backend exposes a public, authenticated REST API. The machine-readable specification is located at `/openapi.json`.
+- Health Check: `GET /api/health` (Zero-auth lightweight keepalive ping)
+- Authentication: `POST /api/auth/register`, `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/me`
+- Products: `GET /api/products`, `GET /api/products/:id`
+- Categories: `GET /api/categories`
+- Orders: `POST /api/orders`, `GET /api/orders/user/:id`, `GET /api/orders/:id`, `PUT /api/orders/:id/status`
+- Coupons: `POST /api/coupons/validate`
+

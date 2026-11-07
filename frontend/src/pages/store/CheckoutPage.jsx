@@ -783,7 +783,7 @@ export function CheckoutPage() {
 
           <div className="p-3 bg-muted/40 rounded-xl text-[11px] text-muted-foreground flex items-center gap-2">
             <ShieldCheck className="h-4 w-4 text-foreground shrink-0"/>
-            <span>30-day money-back guarantee with complimentary prepaid return labels.</span>
+            <span>7-day money-back guarantee with complimentary prepaid return labels.</span>
           </div>
         </div>
       </div>

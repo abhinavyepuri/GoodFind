@@ -1,4 +1,4 @@
-import { generateCommunityData } from './communityGenerator.js';
+import prebakedCommunityData from './prebakedCommunityData.json';
 
 export const mockCategories = [
     {
@@ -108,7 +108,7 @@ export const mockProducts = [
         },
         shippingInfo: 'Complimentary expedited 2-day domestic delivery with signature on arrival.',
         warrantyInfo: '2-year comprehensive international manufacturer replacement warranty.',
-        returnPolicy: '30-day money-back guarantee with prepaid return labels.',
+        returnPolicy: '7-day money-back guarantee with prepaid return labels.',
         createdAt: '2026-01-15T08:00:00Z',
     },
     {
@@ -144,7 +144,7 @@ export const mockProducts = [
         },
         shippingInfo: 'Standard 3-5 business days or overnight shipping available.',
         warrantyInfo: '1-year hardware warranty covering key switches and PCB.',
-        returnPolicy: '30-day return policy in original packaging.',
+        returnPolicy: '7-day return policy in original packaging.',
         createdAt: '2026-02-10T11:30:00Z',
     },
     {
@@ -211,7 +211,7 @@ export const mockProducts = [
         },
         shippingInfo: 'Dispatched within 24 hours via tracked parcel.',
         warrantyInfo: '1-year warranty.',
-        returnPolicy: '30-day money-back guarantee.',
+        returnPolicy: '7-day money-back guarantee.',
         createdAt: '2026-02-01T14:15:00Z',
     },
     {
@@ -243,7 +243,7 @@ export const mockProducts = [
         },
         shippingInfo: 'Free standard shipping on orders over ₹50.',
         warrantyInfo: '1-year limited warranty.',
-        returnPolicy: '30-day returns accepted.',
+        returnPolicy: '7-day returns accepted.',
         createdAt: '2026-01-08T10:00:00Z',
     },
     // 2. Fashion & Apparel
@@ -312,7 +312,7 @@ export const mockProducts = [
         },
         shippingInfo: 'Express worldwide shipping available.',
         warrantyInfo: 'Lifetime seam reinforcement repair guarantee.',
-        returnPolicy: 'Exchange or store credit within 30 days.',
+        returnPolicy: 'Exchange or store credit within 7 days.',
         createdAt: '2026-02-14T15:20:00Z',
     },
     {
@@ -346,7 +346,7 @@ export const mockProducts = [
         },
         shippingInfo: 'Free courier shipping with eco-packaging.',
         warrantyInfo: '3-year weather sealing warranty.',
-        returnPolicy: '30-day returns accepted.',
+        returnPolicy: '7-day returns accepted.',
         createdAt: '2026-01-28T09:40:00Z',
     },
     {
@@ -380,7 +380,7 @@ export const mockProducts = [
         },
         shippingInfo: 'Includes custom cedar shoe trees and cotton polish cloth.',
         warrantyInfo: '5-year structural craftsmanship warranty.',
-        returnPolicy: '30-day uncreased trial exchange.',
+        returnPolicy: '7-day uncreased trial exchange.',
         createdAt: '2026-01-19T11:00:00Z',
     },
     // 3. Home & Ergonomics
@@ -448,7 +448,7 @@ export const mockProducts = [
         },
         shippingInfo: 'White-glove inside delivery and room-of-choice placement.',
         warrantyInfo: '15-year desktop and 10-year motor warranty.',
-        returnPolicy: '30-day guarantee.',
+        returnPolicy: '7-day guarantee.',
         createdAt: '2026-01-05T10:00:00Z',
     },
     {
@@ -481,7 +481,7 @@ export const mockProducts = [
         },
         shippingInfo: 'Foam molded double carton packaging.',
         warrantyInfo: '2-year fixture warranty.',
-        returnPolicy: '30-day returns accepted.',
+        returnPolicy: '7-day returns accepted.',
         createdAt: '2026-02-12T16:00:00Z',
     },
     // 4. Beauty & Wellness
@@ -610,7 +610,7 @@ export const mockProducts = [
         },
         shippingInfo: 'Free express shipping.',
         warrantyInfo: '2-year replacement warranty.',
-        returnPolicy: '30-day returns accepted.',
+        returnPolicy: '7-day returns accepted.',
         createdAt: '2026-01-18T16:00:00Z',
     },
     // 6. Digital Goods & Blueprints
@@ -705,7 +705,7 @@ export const mockProducts = [
         },
         shippingInfo: 'Custom cardboard archival mailer.',
         warrantyInfo: 'Arrives in pristine mint condition.',
-        returnPolicy: '30-day return policy.',
+        returnPolicy: '7-day return policy.',
         createdAt: '2026-01-14T09:00:00Z',
     },
     // 8. Luxury Accessories & Additional Catalog Items
@@ -740,7 +740,7 @@ export const mockProducts = [
         },
         shippingInfo: 'Insured signature delivery in custom wooden presentation case.',
         warrantyInfo: '5-year international movement warranty.',
-        returnPolicy: '30-day unworn trial return policy.',
+        returnPolicy: '7-day unworn trial return policy.',
         createdAt: '2026-01-09T10:00:00Z',
     },
     {
@@ -772,7 +772,7 @@ export const mockProducts = [
         },
         shippingInfo: 'Delivered in presentation box with cloth pouch.',
         warrantyInfo: 'Lifetime seam warranty.',
-        returnPolicy: '30-day return policy.',
+        returnPolicy: '7-day return policy.',
         createdAt: '2026-01-24T14:00:00Z',
     },
     {
@@ -806,7 +806,7 @@ export const mockProducts = [
         },
         shippingInfo: 'Fast 2-day delivery.',
         warrantyInfo: '2-year warranty.',
-        returnPolicy: '30-day return window.',
+        returnPolicy: '7-day return window.',
         createdAt: '2026-02-08T11:00:00Z',
     },
     {
@@ -839,7 +839,7 @@ export const mockProducts = [
         },
         shippingInfo: 'Heavy package padded courier delivery.',
         warrantyInfo: '2-year manufacturer warranty.',
-        returnPolicy: '30-day trial period.',
+        returnPolicy: '7-day trial period.',
         createdAt: '2026-01-16T15:00:00Z',
     },
     {
@@ -872,7 +872,7 @@ export const mockProducts = [
         },
         shippingInfo: 'Free domestic delivery.',
         warrantyInfo: 'Guaranteed seam durability.',
-        returnPolicy: '30-day free returns.',
+        returnPolicy: '7-day free returns.',
         createdAt: '2026-01-30T10:00:00Z',
     },
     {
@@ -905,7 +905,7 @@ export const mockProducts = [
         },
         shippingInfo: 'Dust bag included with free insured delivery.',
         warrantyInfo: 'Lifetime craftsmanship guarantee.',
-        returnPolicy: '30-day return window.',
+        returnPolicy: '7-day return window.',
         createdAt: '2026-02-02T13:00:00Z',
     },
     {
@@ -934,7 +934,7 @@ export const mockProducts = [
         },
         shippingInfo: 'Custom impact-absorbing foam packaging.',
         warrantyInfo: 'Arrives in pristine condition guaranteed.',
-        returnPolicy: '30-day returns accepted.',
+        returnPolicy: '7-day returns accepted.',
         createdAt: '2026-01-26T09:00:00Z',
     },
     {
@@ -996,7 +996,7 @@ export const mockProducts = [
         },
         shippingInfo: 'Dispatched in recycled padded packaging.',
         warrantyInfo: '100% authentic gemstone guarantee.',
-        returnPolicy: '30-day returns accepted.',
+        returnPolicy: '7-day returns accepted.',
         createdAt: '2026-02-06T10:00:00Z',
     },
     {
@@ -1026,7 +1026,7 @@ export const mockProducts = [
         },
         shippingInfo: 'Free delivery on orders over $50.',
         warrantyInfo: 'Clean scent performance guarantee.',
-        returnPolicy: '30-day returns.',
+        returnPolicy: '7-day returns.',
         createdAt: '2026-02-11T16:00:00Z',
     },
     {
@@ -1055,7 +1055,7 @@ export const mockProducts = [
         },
         shippingInfo: 'Refrigerated warehouse dispatch.',
         warrantyInfo: 'Freshness guarantee.',
-        returnPolicy: '30-day unopened guarantee.',
+        returnPolicy: '7-day unopened guarantee.',
         createdAt: '2026-02-13T08:00:00Z',
     },
     {
@@ -1117,7 +1117,7 @@ export const mockProducts = [
         },
         shippingInfo: 'Wrapped in parchment and boxed for gifting.',
         warrantyInfo: 'Lifetime cover warranty.',
-        returnPolicy: '30-day returns.',
+        returnPolicy: '7-day returns.',
         createdAt: '2026-01-21T14:00:00Z',
     },
     {
@@ -1150,7 +1150,7 @@ export const mockProducts = [
         },
         shippingInfo: 'Same-day dispatch.',
         warrantyInfo: 'Lifetime warranty against bending or breakage.',
-        returnPolicy: '30-day returns accepted.',
+        returnPolicy: '7-day returns accepted.',
         createdAt: '2026-02-07T13:00:00Z',
     },
 ];
@@ -1545,8 +1545,8 @@ const baseMockReviews = [
     },
 ];
 
-// Generate lively parametric community dataset
-const communityData = generateCommunityData(mockProducts);
+// Pre-baked parametric community dataset (orders, reviews, users, addresses)
+const communityData = prebakedCommunityData;
 
 export const mockOrders = [...baseMockOrders, ...communityData.orders];
 export const mockReviews = [...baseMockReviews, ...communityData.reviews];

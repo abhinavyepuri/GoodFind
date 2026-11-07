@@ -90,7 +90,7 @@ export function MiniCartSheet() {
             <div>
               <h4 className="text-lg font-semibold text-foreground">Your bag is empty</h4>
               <p className="text-sm text-muted-foreground max-w-xs mx-auto mt-1">
-                Explore our curated collection of luxury hardware, apparel, and design objects.
+                Explore our collection of curated workspace gear, everyday apparel, and home essentials.
               </p>
             </div>
             <Button onClick={() => {

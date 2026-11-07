@@ -158,9 +158,9 @@ export function isOrderCancellable(order) {
 
 /**
  * Checks if an order is eligible for return.
- * Active for delivered orders within 30 days of creation/delivery.
+ * Active for delivered orders within 7 days of creation/delivery.
  */
-export function isOrderReturnable(order, windowDays = 30) {
+export function isOrderReturnable(order, windowDays = 7) {
   if (!order || !order.status) return false;
   const s = String(order.status).toLowerCase();
   if (s !== 'delivered') return false;
@@ -168,7 +168,7 @@ export function isOrderReturnable(order, windowDays = 30) {
   const rawDate = order.deliveredAt || order.createdAt;
   if (!rawDate) return false;
   const orderDate = new Date(rawDate);
-  const windowMs = (Number(windowDays) || 30) * 24 * 60 * 60 * 1000;
+  const windowMs = (Number(windowDays) || 7) * 24 * 60 * 60 * 1000;
   return Date.now() - orderDate.getTime() <= windowMs;
 }
 

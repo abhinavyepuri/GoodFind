@@ -27,7 +27,7 @@ describe('Product & Commerce Master Store', () => {
             specifications: { Power: '12W' },
             shippingInfo: '2 days',
             warrantyInfo: '1 year',
-            returnPolicy: '30 days',
+            returnPolicy: '7 days',
         });
         expect(created.id).toBeDefined();
         expect(useProductStore.getState().products.length).toBe(initialCount + 1);

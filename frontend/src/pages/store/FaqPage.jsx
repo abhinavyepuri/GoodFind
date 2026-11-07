@@ -18,8 +18,8 @@ export function FaqPage() {
           All domestic orders over ₹150 qualify for complimentary carbon-neutral 2-day delivery. We partner with verified carbon offset initiatives and certified freight carriers who prioritize route optimization and recyclable paper air packaging.
         </AccordionItem>
 
-        <AccordionItem title="What is the 30-Day Open Box Guarantee?">
-          We want you to experience our objects in your daily life. You have 30 calendar days from the date of delivery to test our products. If you are not thoroughly delighted, contact our concierge support team for a prepaid courier return label and a 100% refund.
+        <AccordionItem title="What is the 7-Day Open Box Guarantee?">
+          We want you to experience our objects in your daily life. You have 7 calendar days from the date of delivery to test our products. If you are not thoroughly delighted, contact our concierge support team for a prepaid courier return label and a 100% refund.
         </AccordionItem>
 
         <AccordionItem title="How do I track my order?">

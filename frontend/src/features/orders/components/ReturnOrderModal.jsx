@@ -119,7 +119,7 @@ export function ReturnOrderModal({ order, isOpen, onClose, onConfirmReturn }) {
           </div>
           <DialogTitle>Return Window Expired or Not Delivered</DialogTitle>
           <DialogDescription>
-            Returns can only be requested for orders in <strong>Delivered</strong> status within our 30-day satisfaction window.
+            Returns can only be requested for orders in <strong>Delivered</strong> status within our 7-day satisfaction window.
           </DialogDescription>
           <div className="p-4 rounded-xl border bg-muted/40 text-xs text-muted-foreground text-left space-y-2">
             <p>• <strong>Order Status:</strong> Currently {order.status}.</p>
@@ -224,7 +224,7 @@ export function ReturnOrderModal({ order, isOpen, onClose, onConfirmReturn }) {
               <DialogTitle>Return & Exchange Request</DialogTitle>
             </div>
             <DialogDescription>
-              Order #{order.orderNumber} • 30-Day Complimentary Return Policy
+              Order #{order.orderNumber} • 7-Day Complimentary Return Policy
             </DialogDescription>
           </DialogHeader>
 

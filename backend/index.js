@@ -10,7 +10,6 @@ import orderRoutes from './routes/orders.js'
 import reviewRoutes from './routes/reviews.js'
 import couponsRoutes from './routes/coupons.js'
 import settingsRoutes from './routes/settings.js'
-import searchRoutes from './routes/search.js'
 import authRoutes from './routes/auth.js'
 import addressRoutes from './routes/addresses.js'
 import healthRoutes from './routes/health.js'
@@ -108,7 +107,6 @@ app.use('/api/orders', orderRoutes)
 app.use('/api/reviews', reviewRoutes)
 app.use('/api/coupons', couponsRoutes)
 app.use('/api/settings', settingsRoutes)
-app.use('/api/search', searchRoutes)
 app.use('/api/auth', authRoutes)
 app.use('/api/user/addresses', addressRoutes)
 app.use('/api/health', healthRoutes)

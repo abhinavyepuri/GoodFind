@@ -149,7 +149,7 @@ export function OrderHistoryPage() {
             </div>
             <div className="space-y-1">
               <h3 className="text-sm font-bold text-foreground">
-                GoodFind 30-Day Happiness Guarantee
+                GoodFind 7-Day Happiness Guarantee
               </h3>
               <p className="text-xs text-muted-foreground max-w-xl leading-relaxed">
                 Every purchase is protected with prepaid returns, real-time shipment monitoring, and our direct artisan warranty.
